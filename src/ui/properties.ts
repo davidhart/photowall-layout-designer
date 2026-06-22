@@ -244,11 +244,16 @@ export class PropertiesPanel {
     ]);
   }
 
-  /** Default colors plus any custom colors already in the project (dedup by hex). */
+  /** Default colors + cross-project palette + this project's custom colors. */
   private palette(project: Project): FrameColor[] {
     const seen = new Set<string>();
     const result: FrameColor[] = [];
-    for (const c of [...DEFAULT_FRAME_COLORS, ...project.customColors]) {
+    const all = [
+      ...DEFAULT_FRAME_COLORS,
+      ...this.store.getUI().customPalette,
+      ...project.customColors,
+    ];
+    for (const c of all) {
       if (!seen.has(c.hex)) {
         seen.add(c.hex);
         result.push(c);
@@ -266,6 +271,8 @@ export class PropertiesPanel {
       return next;
     });
     this.store.setLastFrameColor(color.hex);
+    // Persist custom colors across projects (cross-project palette).
+    if (isCustom) this.store.addCustomPaletteColor(color);
   }
 
   private rotationControl(): HTMLElement {

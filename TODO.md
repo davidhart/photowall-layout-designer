@@ -149,14 +149,14 @@ completed.
 
 ## Phase 11 — Persistence
 
-- [ ] Serialize project → **JSON** (embed image data URLs + **used custom
+- [x] Serialize project → **JSON** (embed image data URLs + **used custom
       colors**).
-- [ ] Deserialize / validate JSON → project.
-- [ ] **Auto-save to `localStorage`**; restore on load.
-- [ ] Toolbar **Save** (download .json), **Load** (file picker), **New** (reset).
-- [ ] **Custom color palette** persisted separately in `localStorage` (across
+- [x] Deserialize / validate JSON → project.
+- [x] **Auto-save to `localStorage`**; restore on load.
+- [x] Toolbar **Save** (download .json), **Load** (file picker), **New** (reset).
+- [x] **Custom color palette** persisted separately in `localStorage` (across
       projects).
-- [ ] Handle `localStorage` quota gracefully (warn; IndexedDB fallback noted as
+- [x] Handle `localStorage` quota gracefully (warn; IndexedDB fallback noted as
       future work).
 
 ## Phase 12 — Bill of Materials

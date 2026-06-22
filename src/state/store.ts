@@ -1,6 +1,6 @@
 import { defaultProject } from "../model/defaults";
 import { DEFAULT_FRAME_COLOR_HEX } from "../model/colors";
-import type { AABB, Project, Selection } from "../model/types";
+import type { AABB, FrameColor, Project, Selection } from "../model/types";
 import type { Command } from "./commands";
 
 /**
@@ -24,6 +24,8 @@ export interface UIState {
   lastFrameColor: string;
   /** live drag preview offset, or null when not dragging */
   drag: DragState | null;
+  /** custom colors created by the user, persisted across projects */
+  customPalette: FrameColor[];
 }
 
 function initialUIState(): UIState {
@@ -32,6 +34,7 @@ function initialUIState(): UIState {
     viewBox: null,
     lastFrameColor: DEFAULT_FRAME_COLOR_HEX,
     drag: null,
+    customPalette: [],
   };
 }
 
@@ -111,10 +114,27 @@ export class Store {
    * transient UI selection; the viewBox is reset so the next render refits.
    */
   replaceProject(project: Project): void {
+    const palette = this.ui.customPalette;
     this.project = project;
     this.past = [];
     this.future = [];
-    this.ui = initialUIState();
+    this.ui = { ...initialUIState(), customPalette: palette };
+    this.emit();
+  }
+
+  /** Replaces the cross-project custom color palette. */
+  setCustomPalette(colors: FrameColor[]): void {
+    this.ui = { ...this.ui, customPalette: colors };
+    this.emit();
+  }
+
+  /** Adds a custom color to the palette (dedup by hex). */
+  addCustomPaletteColor(color: FrameColor): void {
+    if (this.ui.customPalette.some((c) => c.hex === color.hex)) return;
+    this.ui = {
+      ...this.ui,
+      customPalette: [...this.ui.customPalette, color],
+    };
     this.emit();
   }
 

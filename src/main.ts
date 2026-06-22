@@ -1,11 +1,17 @@
 import "./style.css";
 import { WallView } from "./render/renderer";
 import { bindHistoryShortcuts } from "./state/keyboard";
+import { attachAutosave } from "./persistence/autosave";
+import {
+  loadPalette,
+  loadProjectFromStorage,
+} from "./persistence/storage";
 import { importAndAddPhotos } from "./photo/photoService";
 import { removePhoto } from "./state/commands";
 import { Store } from "./state/store";
 import { LeftPanel } from "./ui/panel";
 import { PropertiesPanel } from "./ui/properties";
+import { initToolbar, mergeProjectColorsIntoPalette } from "./ui/toolbar";
 import { ViewportControls } from "./view/controls";
 import { InteractionController } from "./view/interaction";
 import { DropController } from "./view/dropController";
@@ -31,7 +37,12 @@ function boot(): void {
   const wallContainer = document.getElementById("wall-view");
   if (!wallContainer) throw new Error("#wall-view not found");
 
-  const store = new Store();
+  // Restore the last auto-saved project + cross-project custom palette.
+  const restored = loadProjectFromStorage();
+  const store = new Store(restored ?? undefined);
+  store.setCustomPalette(loadPalette());
+  if (restored) mergeProjectColorsIntoPalette(store, restored);
+
   const wallView = new WallView(wallContainer, store);
   wallView.render();
 
@@ -66,6 +77,12 @@ function boot(): void {
 
   const propsEl = document.getElementById("properties-panel");
   if (propsEl) new PropertiesPanel(propsEl, store);
+
+  attachAutosave(store, (message) => showErrors([message]));
+  initToolbar(store, {
+    onError: (m) => alert(m),
+    // Bill of Materials is wired in Phase 12.
+  });
 
   bindHistoryShortcuts(store);
   initTabs();
