@@ -35,6 +35,19 @@ function apertureOrientation(frame: Frame): "portrait" | "landscape" {
 }
 
 /**
+ * The SVG transform that positions + rotates a frame group. Rotation preserves
+ * the center, so we position at the final AABB center and rotate around it.
+ * Exposed so the renderer can update a frame's position in place (during a
+ * drag) without rebuilding its DOM (and its `<image>`).
+ */
+export function frameTransform(frame: Frame): string {
+  const outer = outerSize(frame);
+  const cx = frame.x + outer.width / 2;
+  const cy = frame.y + outer.height / 2;
+  return `translate(${cx} ${cy}) rotate(${frame.rotation})`;
+}
+
+/**
  * Renders a single frame as an SVG group. The group is built in a local,
  * centered, *unrotated* coordinate space and then positioned + rotated as a
  * whole, so the image and frame rotate together and stay axis-aligned.
@@ -50,14 +63,8 @@ export function renderFrame(
   const uw = aw + t * 2; // unrotated outer width
   const uh = ah + t * 2; // unrotated outer height
 
-  // Rotation preserves the center, so position the group at the final AABB
-  // center and rotate around it.
-  const outer = outerSize(frame);
-  const cx = frame.x + outer.width / 2;
-  const cy = frame.y + outer.height / 2;
-
   const g = svgEl("g", {
-    transform: `translate(${cx} ${cy}) rotate(${frame.rotation})`,
+    transform: frameTransform(frame),
     "data-frame-id": frame.id,
     class: "frame",
   });
@@ -176,14 +183,19 @@ export interface DragOffset {
 /** Snap guide color. */
 const GUIDE_COLOR = "#ff2d6c";
 
-/** Builds the snap-guide overlay lines spanning the current viewBox. */
-function buildGuides(
-  guides: { vertical: number[]; horizontal: number[] },
+/**
+ * Populates a group with snap-guide lines spanning the current viewBox. Clears
+ * the group first so it can be updated in place during a drag.
+ */
+export function renderSnapGuides(
+  group: SVGGElement,
+  guides: { vertical: number[]; horizontal: number[] } | null,
   viewBox: AABB,
-): SVGGElement {
-  const g = svgEl("g", { class: "snap-guides" });
+): void {
+  group.replaceChildren();
+  if (!guides) return;
   for (const x of guides.vertical) {
-    g.appendChild(
+    group.appendChild(
       svgEl("line", {
         x1: x,
         y1: viewBox.y,
@@ -196,7 +208,7 @@ function buildGuides(
     );
   }
   for (const y of guides.horizontal) {
-    g.appendChild(
+    group.appendChild(
       svgEl("line", {
         x1: viewBox.x,
         y1: y,
@@ -208,7 +220,6 @@ function buildGuides(
       }),
     );
   }
-  return g;
 }
 
 export function buildWallSvg(
@@ -247,9 +258,11 @@ export function buildWallSvg(
     svg.appendChild(renderFrame(drawn, photo, selection.has(frame.id)));
   }
 
-  if (drag?.guides) {
-    svg.appendChild(buildGuides(drag.guides, viewBox));
-  }
+  // Persistent (initially empty) guide layer — the live renderer updates it in
+  // place during a drag without rebuilding the frames.
+  const guidesGroup = svgEl("g", { class: "snap-guides" });
+  renderSnapGuides(guidesGroup, drag?.guides ?? null, viewBox);
+  svg.appendChild(guidesGroup);
 
   return svg;
 }
