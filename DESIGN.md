@@ -329,12 +329,26 @@ wall).
 
 ## Persistence
 
-- The current layout is **auto-saved to `localStorage`** and restored on reopen.
-- **Save / Load** (toolbar) serialize the project to / from a **JSON** file.
+There are two distinct persistence paths, which deliberately store **different
+amounts of data**:
+
+- **Auto-save to `localStorage`** — stores **layout only**: the wall settings,
+  the standard-size / passpartout configuration, and every frame (position,
+  size, thickness, color, rotation, passpartout). It does **not** store any
+  image data — image data URLs are large and would quickly exceed the
+  `localStorage` quota. On reopen, the layout is restored, but **frames that
+  held a photo come back as empty placeholders** (the pictures are not kept in
+  the browser). To keep the actual photos, use **Save**.
+- **Save / Load** (toolbar) — serialize the project to / from a **JSON** file.
+  This is the portable, complete backup: it **embeds image data** (base64 /
+  data URLs) so a saved project survives reload and JSON round-trips and can be
+  opened on another machine. (The browser cannot persist photos by filesystem
+  path, so embedding is the only way for the file to be self-contained.)
 - **New** (toolbar) clears the project to start fresh.
-- Note: the browser cannot persist photos by filesystem path. Saved projects
-  must therefore embed image data (e.g. base64 / data URLs) so they survive
-  reload and JSON round-trips. *(Approach to confirm during build.)*
+
+Note: loading a JSON file restores the embedded photos for the session, but the
+next `localStorage` auto-save still stores layout-only — reopening later
+(without re-loading the file) again shows those frames as empty placeholders.
 
 ### Custom colors
 
@@ -356,5 +370,8 @@ wall).
   gold, silver) — placeholders for now.
 - Precise zoom/pan input bindings (scroll vs. pinch, modifier keys).
 - Visual snap guides (rendering of the snap indicators).
-- Storage strategy for embedded image data given `localStorage` size limits
-  (e.g. IndexedDB fallback if projects exceed the quota).
+- Browser-persisting the **actual photos** across reloads (e.g. an IndexedDB
+  store of image blobs) so reopened layouts keep their pictures rather than
+  showing empty placeholders. Resolved for now by **not** persisting images to
+  `localStorage` at all (layout-only auto-save; images live only in the
+  in-memory session and in explicitly Saved JSON files).

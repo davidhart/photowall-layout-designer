@@ -12,14 +12,34 @@ import type {
 /** Thrown when a JSON payload can't be parsed/validated into a Project. */
 export class ProjectParseError extends Error {}
 
+export interface SerializeOptions {
+  /**
+   * Whether to embed photo image data (data URLs). True for the explicit JSON
+   * **Save** (portable round-trip). False for **localStorage auto-save**, which
+   * stores only the layout — no images (see DESIGN.md → Persistence).
+   */
+  embedImages?: boolean;
+}
+
 /**
- * Serializes a project to JSON, embedding image data URLs and only the custom
- * colors actually used by frames (see DESIGN.md → Persistence).
+ * Serializes a project to JSON. With `embedImages` (default) it embeds photo
+ * data URLs and only the custom colors used by frames. Without it, the `photos`
+ * array is dropped and every frame's `photoId` is cleared, so only frames + the
+ * wall/layout configuration are stored (frames that held a photo restore as
+ * empty placeholders).
  */
-export function serializeProject(project: Project): string {
+export function serializeProject(
+  project: Project,
+  options: SerializeOptions = {},
+): string {
+  const { embedImages = true } = options;
   const usedHexes = new Set(project.frames.map((f) => f.color));
   const customColors = project.customColors.filter((c) => usedHexes.has(c.hex));
-  return JSON.stringify({ ...project, customColors }, null, 0);
+  const photos = embedImages ? project.photos : [];
+  const frames = embedImages
+    ? project.frames
+    : project.frames.map((f) => ({ ...f, photoId: null }));
+  return JSON.stringify({ ...project, photos, frames, customColors }, null, 0);
 }
 
 // ---- Validation helpers ----

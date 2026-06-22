@@ -18,10 +18,14 @@ function isQuotaError(err: unknown): boolean {
   );
 }
 
-/** Auto-saves the project to localStorage; reports quota failures gracefully. */
+/**
+ * Auto-saves the project layout to localStorage. Image data is **not** stored
+ * (only frames + wall/layout config); to keep the actual photos, use the
+ * toolbar Save to download a JSON backup. Reports quota failures gracefully.
+ */
 export function saveProjectToStorage(project: Project): SaveOutcome {
   try {
-    localStorage.setItem(PROJECT_KEY, serializeProject(project));
+    localStorage.setItem(PROJECT_KEY, serializeProject(project, { embedImages: false }));
     return { ok: true };
   } catch (err) {
     if (isQuotaError(err)) {
@@ -29,7 +33,7 @@ export function saveProjectToStorage(project: Project): SaveOutcome {
         ok: false,
         error:
           "Storage limit reached — your layout could not be auto-saved. " +
-          "Use Save to download a JSON backup. (IndexedDB fallback is future work.)",
+          "Use Save to download a JSON backup.",
       };
     }
     return { ok: false, error: "Auto-save failed." };

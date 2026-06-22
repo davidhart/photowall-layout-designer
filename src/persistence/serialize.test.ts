@@ -41,6 +41,28 @@ describe("serialize / deserialize round-trip", () => {
     expect(back.photos[0]?.dataUrl).toBe("data:image/png;base64,AAA");
   });
 
+  it("omits images and clears photoIds when embedImages is false (localStorage mode)", () => {
+    const p = defaultProject();
+    p.photos.push({
+      id: "p1",
+      name: "p.jpg",
+      dataUrl: "data:image/png;base64,HUGE",
+      thumbnailDataUrl: "data:image/png;base64,T",
+      pixelWidth: 100,
+      pixelHeight: 200,
+    });
+    p.frames.push(frame("f1", { photoId: "p1" }));
+
+    const json = serializeProject(p, { embedImages: false });
+    expect(json).not.toContain("HUGE"); // no image data persisted
+    const back = deserializeProject(json);
+    expect(back.photos).toEqual([]);
+    expect(back.frames[0]?.photoId).toBeNull(); // restores as empty placeholder
+    // layout is preserved
+    expect(back.frames[0]?.aperture).toEqual({ width: 21, height: 29.7 });
+    expect(back.wall.width).toBe(p.wall.width);
+  });
+
   it("embeds only custom colors used by frames", () => {
     const p = defaultProject();
     p.customColors.push(
