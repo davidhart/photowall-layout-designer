@@ -114,12 +114,12 @@ completed.
 
 ## Phase 8 — Photo import pipeline
 
-- [ ] Read files (JPEG/PNG; **HEIC only if browser decodes natively** — feature
+- [x] Read files (JPEG/PNG; **HEIC only if browser decodes natively** — feature
       detect, otherwise reject with a message).
-- [ ] Apply **EXIF orientation** on import so stored pixels are upright.
-- [ ] Capture original pixel **dimensions/orientation**.
-- [ ] Store image as **data URL** (base64) for persistence/round-trip.
-- [ ] Generate **small thumbnail** by resizing dimensions (for panel + BOM).
+- [x] Apply **EXIF orientation** on import so stored pixels are upright.
+- [x] Capture original pixel **dimensions/orientation**.
+- [x] Store image as **data URL** (base64) for persistence/round-trip.
+- [x] Generate **small thumbnail** by resizing dimensions (for panel + BOM).
 
 ## Phase 9 — Drag & drop wiring
 

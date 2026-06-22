@@ -1,6 +1,7 @@
 import "./style.css";
 import { WallView } from "./render/renderer";
 import { bindHistoryShortcuts } from "./state/keyboard";
+import { importAndAddPhotos } from "./photo/photoService";
 import { removePhoto } from "./state/commands";
 import { Store } from "./state/store";
 import { LeftPanel } from "./ui/panel";
@@ -35,7 +36,12 @@ function boot(): void {
   new ViewportControls(wallContainer, store);
   new InteractionController(wallContainer, store);
   new LeftPanel(store, {
-    // Photo import is wired in Phase 8; removal warning in Phase 9.
+    onAddPhotos: (files) => {
+      void importAndAddPhotos(store, files).then(({ errors }) => {
+        if (errors.length) alert(errors.join("\n"));
+      });
+    },
+    // Removal warning (photo in use) is added in Phase 9.
     onRemovePhoto: (photoId) => store.dispatch(removePhoto(photoId)),
   });
   bindHistoryShortcuts(store);
