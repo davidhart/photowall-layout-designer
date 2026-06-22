@@ -31,21 +31,21 @@ completed.
 
 ## Phase 1 — Domain model, units & geometry (pure, no UI)
 
-- [ ] Define core TypeScript types: `Project`, `WallSettings`, `Photo`,
+- [x] Define core TypeScript types: `Project`, `WallSettings`, `Photo`,
       `Frame`, `StandardSize`, `PasspartoutSize`, `FrameColor`, `Selection`.
-- [ ] Encode the **ISO A-series A0–A6** size table in cm (portrait baseline).
-- [ ] Helpers (pure, unit-tested):
-  - [ ] `cm` is the canonical unit throughout; no px in the model.
-  - [ ] Orientation from photo pixel dims (portrait/landscape).
-  - [ ] **Nearest standard size** for a given aspect ratio + orientation
+- [x] Encode the **ISO A-series A0–A6** size table in cm (portrait baseline).
+- [x] Helpers (pure, unit-tested):
+  - [x] `cm` is the canonical unit throughout; no px in the model.
+  - [x] Orientation from photo pixel dims (portrait/landscape).
+  - [x] **Nearest standard size** for a given aspect ratio + orientation
         (with custom fallback when nothing is close).
-  - [ ] **Effective photo print size** = passpartout inner-window if set, else
+  - [x] **Effective photo print size** = passpartout inner-window if set, else
         aperture.
-  - [ ] Frame **outer AABB** = aperture + thickness on each side (+ rotation
+  - [x] Frame **outer AABB** = aperture + thickness on each side (+ rotation
         swap of w/h for 90°/270°).
-  - [ ] Default per-frame-size **passpartout options** = all smaller standard
+  - [x] Default per-frame-size **passpartout options** = all smaller standard
         sizes (e.g. A3 → A4, A5, A6).
-- [ ] Define the **default project** (wall 200×150 cm, white wall, default
+- [x] Define the **default project** (wall 200×150 cm, white wall, default
       sizes/passpartout config).
 
 ## Phase 2 — State store, mutations & undo/redo
