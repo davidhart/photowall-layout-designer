@@ -85,6 +85,22 @@ button:hover {
   height: 100%;
 }
 
+/* ---- Zoom controls (overlay, bottom-right of wall view) ---- */
+.zoom-controls {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  gap: 4px;
+  z-index: 10;
+}
+
+.zoom-controls button {
+  min-width: 36px;
+  background: var(--surface);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
 /* ---- Left floating panel ---- */
 .left-panel {
   position: absolute;

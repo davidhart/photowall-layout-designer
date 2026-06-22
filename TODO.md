@@ -77,11 +77,11 @@ completed.
 
 ## Phase 4 — Zoom & pan
 
-- [ ] **Fit-whole-wall-to-viewport** on load.
-- [ ] Zoom (scroll/pinch + controls), clamped to **~10%–800%**, zoom toward
+- [x] **Fit-whole-wall-to-viewport** on load.
+- [x] Zoom (scroll/pinch + controls), clamped to **~10%–800%**, zoom toward
       cursor.
-- [ ] Pan (drag empty canvas / space-drag / middle-mouse).
-- [ ] All implemented by mutating the SVG viewBox; confirm cm geometry unaffected.
+- [x] Pan (drag empty canvas / space-drag / middle-mouse).
+- [x] All implemented by mutating the SVG viewBox; confirm cm geometry unaffected.
 
 ## Phase 5 — Selection & manipulation
 

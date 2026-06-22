@@ -27,7 +27,10 @@ export class WallView {
     const viewBox = ui.viewBox ?? defaultViewBox(project);
     const selection = new Set(ui.selection.frameIds);
     const svg = buildWallSvg(project, viewBox, selection);
-    this.container.replaceChildren(svg);
+    // Replace only our own <svg>, leaving sibling overlays (e.g. zoom
+    // controls) untouched.
+    if (this.svg) this.svg.replaceWith(svg);
+    else this.container.appendChild(svg);
     this.svg = svg;
   }
 }
