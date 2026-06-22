@@ -1,6 +1,7 @@
 import "./style.css";
 import { WallView } from "./render/renderer";
 import { bindHistoryShortcuts } from "./state/keyboard";
+import { generateBillOfMaterials } from "./bom/print";
 import { attachAutosave } from "./persistence/autosave";
 import {
   loadPalette,
@@ -81,7 +82,7 @@ function boot(): void {
   attachAutosave(store, (message) => showErrors([message]));
   initToolbar(store, {
     onError: (m) => alert(m),
-    // Bill of Materials is wired in Phase 12.
+    onGenerateBom: () => generateBillOfMaterials(store.getProject()),
   });
 
   bindHistoryShortcuts(store);

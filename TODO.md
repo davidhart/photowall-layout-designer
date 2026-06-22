@@ -161,14 +161,14 @@ completed.
 
 ## Phase 12 — Bill of Materials
 
-- [ ] **Generate Bill of Materials** toolbar action.
-- [ ] Build a **print-styled HTML view** with print CSS for **two A4 pages**.
-- [ ] **Page 1**: wall layout rendered **fit to A4** for reference.
-- [ ] **Page 2**: aggregated lists —
-  - [ ] **Photos to print**: thumbnail + **effective print size** per photo.
-  - [ ] **Frames to buy**: counts per frame size.
-  - [ ] **Passpartouts**: counts per passpartout, if any.
-- [ ] Trigger `window.print()` (native save-as-PDF); restore app view after.
+- [x] **Generate Bill of Materials** toolbar action.
+- [x] Build a **print-styled HTML view** with print CSS for **two A4 pages**.
+- [x] **Page 1**: wall layout rendered **fit to A4** for reference.
+- [x] **Page 2**: aggregated lists —
+  - [x] **Photos to print**: thumbnail + **effective print size** per photo.
+  - [x] **Frames to buy**: counts per frame size.
+  - [x] **Passpartouts**: counts per passpartout, if any.
+- [x] Trigger `window.print()` (native save-as-PDF); restore app view after.
 
 ## Phase 13 — Build, cross-browser & polish
 
