@@ -163,10 +163,18 @@ function buildGridDefs(): SVGDefsElement {
  * Builds the full wall SVG from the project and selection. Full re-render on
  * each change is fine for the ~20-frame target.
  */
+/** A live drag offset applied to a set of frame ids during rendering. */
+export interface DragOffset {
+  ids: ReadonlySet<string>;
+  dx: number;
+  dy: number;
+}
+
 export function buildWallSvg(
   project: Project,
   viewBox: AABB,
   selection: ReadonlySet<string>,
+  drag: DragOffset | null = null,
 ): SVGSVGElement {
   const vb = `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`;
   const svg = svgEl("svg", {
@@ -191,7 +199,11 @@ export function buildWallSvg(
   const photosById = new Map(project.photos.map((p) => [p.id, p]));
   for (const frame of project.frames) {
     const photo = frame.photoId ? photosById.get(frame.photoId) ?? null : null;
-    svg.appendChild(renderFrame(frame, photo, selection.has(frame.id)));
+    const drawn =
+      drag && drag.ids.has(frame.id)
+        ? { ...frame, x: frame.x + drag.dx, y: frame.y + drag.dy }
+        : frame;
+    svg.appendChild(renderFrame(drawn, photo, selection.has(frame.id)));
   }
 
   return svg;

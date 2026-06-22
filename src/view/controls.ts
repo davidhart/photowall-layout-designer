@@ -97,14 +97,14 @@ export class ViewportControls {
     this.zoomByFactor(factor, event.clientX - rect.left, event.clientY - rect.top);
   };
 
-  /** A pan starts on middle-mouse, space-drag, or a drag on empty canvas. */
+  /**
+   * A pan starts on middle-mouse or space-drag. Plain left-drag is reserved for
+   * selection / move / rubber-band (handled by the interaction controller).
+   */
   private isPanStart(event: PointerEvent): boolean {
     if (event.button === 1) return true; // middle mouse
-    if (event.button !== 0) return false;
-    if (this.spaceHeld) return true;
-    // Empty canvas = not on a frame (frame interaction is handled in Phase 5).
-    const target = event.target as Element | null;
-    return !target?.closest("[data-frame-id]");
+    if (event.button === 0 && this.spaceHeld) return true;
+    return false;
   }
 
   private onPointerDown = (event: PointerEvent): void => {

@@ -101,6 +101,19 @@ button:hover {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
+/* ---- Rubber-band marquee ---- */
+.marquee {
+  position: absolute;
+  border: 1px solid var(--accent);
+  background: rgba(43, 108, 255, 0.12);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.frame {
+  cursor: pointer;
+}
+
 /* ---- Left floating panel ---- */
 .left-panel {
   position: absolute;

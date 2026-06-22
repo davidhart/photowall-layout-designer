@@ -85,13 +85,13 @@ completed.
 
 ## Phase 5 — Selection & manipulation
 
-- [ ] Click to **select** a frame; click empty space to clear.
-- [ ] **Multi-select**: shift/ctrl-click toggle + **rubber-band** marquee.
-- [ ] **Move** by dragging (screen px delta → cm via current zoom).
-- [ ] **Group move**: dragging any selected frame moves all, preserving relative
+- [x] Click to **select** a frame; click empty space to clear.
+- [x] **Multi-select**: shift/ctrl-click toggle + **rubber-band** marquee.
+- [x] **Move** by dragging (screen px delta → cm via current zoom).
+- [x] **Group move**: dragging any selected frame moves all, preserving relative
       positions.
-- [ ] **Delete** selected frame(s) via Delete/Backspace.
-- [ ] Confirm overlap and out-of-bounds placement are allowed (no clamping).
+- [x] **Delete** selected frame(s) via Delete/Backspace.
+- [x] Confirm overlap and out-of-bounds placement are allowed (no clamping).
 
 ## Phase 6 — Snapping (during move)
 

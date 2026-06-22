@@ -3,6 +3,7 @@ import { WallView } from "./render/renderer";
 import { bindHistoryShortcuts } from "./state/keyboard";
 import { Store } from "./state/store";
 import { ViewportControls } from "./view/controls";
+import { InteractionController } from "./view/interaction";
 
 /** Wires up the left-panel tab switching (real panel content comes later). */
 function initTabs(): void {
@@ -30,6 +31,7 @@ function boot(): void {
   wallView.render();
 
   new ViewportControls(wallContainer, store);
+  new InteractionController(wallContainer, store);
   bindHistoryShortcuts(store);
   initTabs();
 

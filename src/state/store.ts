@@ -7,12 +7,21 @@ import type { Command } from "./commands";
  * Transient UI state. This is intentionally **not** part of the undo history —
  * you don't undo a pan, a zoom, or a selection change.
  */
+/** Transient live-drag offset (in cm) applied to frames while dragging. */
+export interface DragState {
+  ids: string[];
+  dx: number;
+  dy: number;
+}
+
 export interface UIState {
   selection: Selection;
   /** current view rectangle in cm (the SVG viewBox); null until first fit */
   viewBox: AABB | null;
   /** color a newly added frame inherits (last selected frame's color) */
   lastFrameColor: string;
+  /** live drag preview offset, or null when not dragging */
+  drag: DragState | null;
 }
 
 function initialUIState(): UIState {
@@ -20,6 +29,7 @@ function initialUIState(): UIState {
     selection: { frameIds: [] },
     viewBox: null,
     lastFrameColor: DEFAULT_FRAME_COLOR_HEX,
+    drag: null,
   };
 }
 
@@ -120,6 +130,12 @@ export class Store {
 
   setViewBox(viewBox: AABB): void {
     this.ui = { ...this.ui, viewBox };
+    this.emit();
+  }
+
+  /** Sets (or clears) the live drag preview offset. */
+  setDrag(drag: DragState | null): void {
+    this.ui = { ...this.ui, drag };
     this.emit();
   }
 
