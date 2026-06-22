@@ -60,20 +60,20 @@ completed.
 
 ## Phase 3 — Wall rendering (SVG)
 
-- [ ] Create SVG element with **viewBox in cm**.
-- [ ] Render **wall rectangle** filled with the configurable wall color.
-- [ ] Render the **grid** background as a scale reference.
-- [ ] Render a **frame** from the model:
-  - [ ] Outer moulding rectangle in the frame color.
-  - [ ] Mat/passpartout region (between aperture and inner window) when set.
-  - [ ] Aperture / inner-window area.
-  - [ ] Photo via `<image>` with `preserveAspectRatio="xMidYMid meet"` clipped
+- [x] Create SVG element with **viewBox in cm**.
+- [x] Render **wall rectangle** filled with the configurable wall color.
+- [x] Render the **grid** background as a scale reference.
+- [x] Render a **frame** from the model:
+  - [x] Outer moulding rectangle in the frame color.
+  - [x] Mat/passpartout region (between aperture and inner window) when set.
+  - [x] Aperture / inner-window area.
+  - [x] Photo via `<image>` with `preserveAspectRatio="xMidYMid meet"` clipped
         to the aperture (handles both exact-fit and scale-to-fit; letterbox
         backing color defined here).
-  - [ ] Empty frame → **white rectangle** in the center instead of a photo.
-  - [ ] Apply **90° rotation** transform (image + frame together).
-- [ ] Render selection highlight(s) for selected frame(s).
-- [ ] Render frames to scale; verify ~20 frames perform fine.
+  - [x] Empty frame → **white rectangle** in the center instead of a photo.
+  - [x] Apply **90° rotation** transform (image + frame together).
+- [x] Render selection highlight(s) for selected frame(s).
+- [x] Render frames to scale; verify ~20 frames perform fine.
 
 ## Phase 4 — Zoom & pan
 
