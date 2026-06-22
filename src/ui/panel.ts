@@ -6,8 +6,8 @@ import { DND_FRAME_SIZE, DND_PHOTO_ID } from "./dnd";
 import { h } from "./dom";
 
 export interface PanelCallbacks {
-  /** Called when the user picks files via the Photos → Add button. */
-  onAddPhotos?: (files: FileList) => void;
+  /** Called with a snapshot of the files picked via the Photos → Add button. */
+  onAddPhotos?: (files: File[]) => void;
   /** Called when the user clicks remove on a photo. */
   onRemovePhoto?: (photoId: string) => void;
 }
@@ -255,10 +255,11 @@ export class LeftPanel {
       style: "display:none",
       onchange: (e: Event) => {
         const input = e.target as HTMLInputElement;
-        if (input.files && input.files.length) {
-          this.callbacks.onAddPhotos?.(input.files);
-        }
+        // Snapshot into an array before resetting the input — clearing it
+        // empties the live FileList and would drop files mid-import.
+        const files = input.files ? Array.from(input.files) : [];
         input.value = "";
+        if (files.length) this.callbacks.onAddPhotos?.(files);
       },
     });
 

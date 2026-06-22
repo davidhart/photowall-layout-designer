@@ -123,9 +123,13 @@ export interface ImportResult {
 export async function importPhotoFiles(
   files: Iterable<File>,
 ): Promise<ImportResult> {
+  // Snapshot the iterable up front: a live `FileList` (e.g. from a file input)
+  // can be emptied while we await decoding — notably when the input is reset —
+  // which would truncate the loop and drop every file after the first.
+  const list = Array.from(files);
   const photos: Photo[] = [];
   const errors: string[] = [];
-  for (const file of files) {
+  for (const file of list) {
     try {
       photos.push(await importPhotoFile(file));
     } catch (err) {

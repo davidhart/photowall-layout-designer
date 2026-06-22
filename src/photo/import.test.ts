@@ -1,5 +1,31 @@
-import { describe, expect, it } from "vitest";
-import { isLikelySupported, thumbnailSize } from "./import";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { importPhotoFiles, isLikelySupported, thumbnailSize } from "./import";
+
+describe("importPhotoFiles", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("snapshots the file list so a source emptied mid-import isn't truncated", async () => {
+    // Reproduces the picker bug: the input's live FileList is cleared after the
+    // async import starts. importPhotoFiles must process every file regardless.
+    const src = [
+      new File(["a"], "a.jpg", { type: "image/jpeg" }),
+      new File(["b"], "b.jpg", { type: "image/jpeg" }),
+      new File(["c"], "c.jpg", { type: "image/jpeg" }),
+    ];
+    let calls = 0;
+    vi.stubGlobal("createImageBitmap", () => {
+      calls += 1;
+      if (calls === 1) src.length = 0; // emulate the live FileList being emptied
+      return Promise.reject(new Error("decode disabled in test"));
+    });
+
+    const { photos, errors } = await importPhotoFiles(src);
+    // Decoding is stubbed to fail, so nothing imports — but all three were
+    // *attempted*, proving the list was snapshotted before the await loop.
+    expect(photos).toHaveLength(0);
+    expect(errors).toHaveLength(3);
+  });
+});
 
 describe("isLikelySupported", () => {
   it("accepts jpeg/png by MIME", () => {
