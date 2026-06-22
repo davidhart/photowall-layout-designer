@@ -104,13 +104,13 @@ completed.
 
 ## Phase 7 — Left panel & tabs (UI shell)
 
-- [ ] Floating left panel with **Settings / Photos / Frames** tabs.
-- [ ] **Settings tab**: wall width/height inputs; **wall color** (plain free
+- [x] Floating left panel with **Settings / Photos / Frames** tabs.
+- [x] **Settings tab**: wall width/height inputs; **wall color** (plain free
       color picker, no swatch list); editable **standard frame sizes** list;
       **per-frame-size passpartout** options config.
-- [ ] **Photos tab**: thumbnail list, **Add** button (file picker), remove
+- [x] **Photos tab**: thumbnail list, **Add** button (file picker), remove
       control.
-- [ ] **Frames tab**: palette of standard empty frames to drag onto the wall.
+- [x] **Frames tab**: palette of standard empty frames to drag onto the wall.
 
 ## Phase 8 — Photo import pipeline
 
