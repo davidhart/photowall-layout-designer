@@ -123,15 +123,15 @@ completed.
 
 ## Phase 9 — Drag & drop wiring
 
-- [ ] Filesystem → **Photos tab**: add photo(s) to project.
-- [ ] Filesystem → **wall**: add photo to project **and** create a frame.
-- [ ] Photos tab → **wall**: create a frame containing that photo.
-- [ ] Photo (filesystem or Photos tab) → **onto a frame**: fill if empty,
+- [x] Filesystem → **Photos tab**: add photo(s) to project.
+- [x] Filesystem → **wall**: add photo to project **and** create a frame.
+- [x] Photos tab → **wall**: create a frame containing that photo.
+- [x] Photo (filesystem or Photos tab) → **onto a frame**: fill if empty,
       **replace** if occupied.
-- [ ] Frames tab → **wall**: create an empty placeholder frame.
-- [ ] On photo placement: derive **orientation** + size frame to **nearest
+- [x] Frames tab → **wall**: create an empty placeholder frame.
+- [x] On photo placement: derive **orientation** + size frame to **nearest
       standard size** (custom fallback).
-- [ ] **Remove photo in use** → warning dialog; on accept, remove photo and
+- [x] **Remove photo in use** → warning dialog; on accept, remove photo and
       **empty** all frames using it.
 
 ## Phase 10 — Frame properties panel

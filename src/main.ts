@@ -7,6 +7,7 @@ import { Store } from "./state/store";
 import { LeftPanel } from "./ui/panel";
 import { ViewportControls } from "./view/controls";
 import { InteractionController } from "./view/interaction";
+import { DropController } from "./view/dropController";
 
 /** Wires up the left-panel tab switching (real panel content comes later). */
 function initTabs(): void {
@@ -33,17 +34,35 @@ function boot(): void {
   const wallView = new WallView(wallContainer, store);
   wallView.render();
 
+  const showErrors = (errors: string[]): void => {
+    if (errors.length) alert(errors.join("\n"));
+  };
+
   new ViewportControls(wallContainer, store);
   new InteractionController(wallContainer, store);
   new LeftPanel(store, {
     onAddPhotos: (files) => {
-      void importAndAddPhotos(store, files).then(({ errors }) => {
-        if (errors.length) alert(errors.join("\n"));
-      });
+      void importAndAddPhotos(store, files).then(({ errors }) => showErrors(errors));
     },
-    // Removal warning (photo in use) is added in Phase 9.
-    onRemovePhoto: (photoId) => store.dispatch(removePhoto(photoId)),
+    onRemovePhoto: (photoId) => {
+      const inUse = store
+        .getProject()
+        .frames.filter((f) => f.photoId === photoId).length;
+      if (inUse > 0) {
+        const ok = confirm(
+          `This photo is used by ${inUse} frame${inUse > 1 ? "s" : ""}. ` +
+            `Removing it will empty ${inUse > 1 ? "those frames" : "that frame"}. Continue?`,
+        );
+        if (!ok) return;
+      }
+      store.dispatch(removePhoto(photoId));
+    },
   });
+
+  const drops = new DropController(wallContainer, store, showErrors);
+  const photosPanel = document.querySelector<HTMLElement>('[data-tab-panel="photos"]');
+  if (photosPanel) drops.attachPhotosPanel(photosPanel);
+
   bindHistoryShortcuts(store);
   initTabs();
 
