@@ -50,13 +50,13 @@ completed.
 
 ## Phase 2 — State store, mutations & undo/redo
 
-- [ ] Central **store** holding the `Project` + transient UI state (selection,
+- [x] Central **store** holding the `Project` + transient UI state (selection,
       zoom/pan, last-used frame color).
-- [ ] All edits expressed as **commands** applied immutably to the project.
-- [ ] **History stack** (undo/redo) wrapping every mutating command:
+- [x] All edits expressed as **commands** applied immutably to the project.
+- [x] **History stack** (undo/redo) wrapping every mutating command:
       add/delete/move/resize/recolor/rotate/photo place+replace/property change.
-- [ ] Subscribe mechanism to trigger re-render on change.
-- [ ] Keyboard: **Ctrl/Cmd+Z** (undo), **Ctrl/Cmd+Shift+Z** / **Ctrl+Y** (redo).
+- [x] Subscribe mechanism to trigger re-render on change.
+- [x] Keyboard: **Ctrl/Cmd+Z** (undo), **Ctrl/Cmd+Shift+Z** / **Ctrl+Y** (redo).
 
 ## Phase 3 — Wall rendering (SVG)
 
