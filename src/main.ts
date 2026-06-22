@@ -5,6 +5,7 @@ import { importAndAddPhotos } from "./photo/photoService";
 import { removePhoto } from "./state/commands";
 import { Store } from "./state/store";
 import { LeftPanel } from "./ui/panel";
+import { PropertiesPanel } from "./ui/properties";
 import { ViewportControls } from "./view/controls";
 import { InteractionController } from "./view/interaction";
 import { DropController } from "./view/dropController";
@@ -62,6 +63,9 @@ function boot(): void {
   const drops = new DropController(wallContainer, store, showErrors);
   const photosPanel = document.querySelector<HTMLElement>('[data-tab-panel="photos"]');
   if (photosPanel) drops.attachPhotosPanel(photosPanel);
+
+  const propsEl = document.getElementById("properties-panel");
+  if (propsEl) new PropertiesPanel(propsEl, store);
 
   bindHistoryShortcuts(store);
   initTabs();

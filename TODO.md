@@ -136,15 +136,15 @@ completed.
 
 ## Phase 10 — Frame properties panel
 
-- [ ] Floating properties panel appears on (single) selection.
-- [ ] **Frame size** dropdown (standard list) + **custom size** entry.
-- [ ] **Thickness** input (per frame, default 1 cm).
-- [ ] **Passpartout** dropdown (options depend on frame size).
-- [ ] **Color** control: defaults (black/brown/red-brown/gold/silver) + **custom
+- [x] Floating properties panel appears on (single) selection.
+- [x] **Frame size** dropdown (standard list) + **custom size** entry.
+- [x] **Thickness** input (per frame, default 1 cm).
+- [x] **Passpartout** dropdown (options depend on frame size).
+- [x] **Color** control: defaults (black/brown/red-brown/gold/silver) + **custom
       picker**; adding a custom color **pushes it into the options list**.
-- [ ] New frame inherits **last-selected frame's color**.
-- [ ] **Rotation** control (90° steps).
-- [ ] **Multi-select**: shared properties (esp. color) edit **all** selected
+- [x] New frame inherits **last-selected frame's color**.
+- [x] **Rotation** control (90° steps).
+- [x] **Multi-select**: shared properties (esp. color) edit **all** selected
       frames at once.
 
 ## Phase 11 — Persistence

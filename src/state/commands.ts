@@ -74,6 +74,19 @@ export function rotateFrame(id: string, rotation: Rotation): Command {
   return updateFrames([id], { rotation });
 }
 
+/** Rotates each given frame by a relative delta (90° steps), wrapping 0–270. */
+export function rotateFramesBy(ids: readonly string[], delta: number): Command {
+  const set = new Set(ids);
+  return (p) => ({
+    ...p,
+    frames: p.frames.map((f) =>
+      set.has(f.id)
+        ? { ...f, rotation: ((((f.rotation + delta) % 360) + 360) % 360) as Rotation }
+        : f,
+    ),
+  });
+}
+
 /** Places (or replaces) the photo in a frame. */
 export function setFramePhoto(id: string, photoId: string | null): Command {
   return updateFrames([id], { photoId });

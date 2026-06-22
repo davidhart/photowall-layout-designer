@@ -320,3 +320,68 @@ input[type="color"] {
   padding: 12px;
   z-index: 10;
 }
+
+.properties-panel h3 {
+  margin: 0 0 10px;
+  font-size: 13px;
+}
+.prop-field {
+  margin-bottom: 10px;
+}
+.prop-field select,
+.prop-field input[type="number"] {
+  width: 100%;
+  font: inherit;
+  padding: 5px 6px;
+  border: 1px solid var(--surface-border);
+  border-radius: 5px;
+}
+.field-label {
+  display: block;
+  font-size: 12px;
+  color: #6a6a72;
+  margin-bottom: 4px;
+}
+.custom-size {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.custom-size .size-num {
+  width: 70px;
+  padding: 5px 6px;
+  border: 1px solid var(--surface-border);
+  border-radius: 5px;
+  font: inherit;
+}
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.swatch {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px var(--surface-border);
+  cursor: pointer;
+}
+.swatch--active {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+.swatch-custom {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px dashed var(--surface-border);
+}
+.rotate-row {
+  display: flex;
+  gap: 6px;
+}
+.rotate-row button {
+  flex: 1;
+}

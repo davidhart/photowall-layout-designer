@@ -8,6 +8,7 @@ import {
   moveFrames,
   recolorFrames,
   removePhoto,
+  rotateFramesBy,
 } from "./commands";
 import { Store } from "./store";
 
@@ -135,6 +136,24 @@ describe("removePhoto empties frames using it", () => {
 
     expect(store.getProject().photos).toHaveLength(0);
     expect(store.getProject().frames.every((f) => f.photoId === null)).toBe(true);
+  });
+});
+
+describe("rotateFramesBy", () => {
+  it("rotates each selected frame, wrapping 0-270", () => {
+    const store = new Store();
+    store.dispatch(addFrame(frame("f1", { rotation: 270 })));
+    store.dispatch(addFrame(frame("f2", { rotation: 0 })));
+    store.dispatch(rotateFramesBy(["f1", "f2"], 90));
+    expect(store.getProject().frames.find((f) => f.id === "f1")?.rotation).toBe(0);
+    expect(store.getProject().frames.find((f) => f.id === "f2")?.rotation).toBe(90);
+  });
+
+  it("wraps negative deltas", () => {
+    const store = new Store();
+    store.dispatch(addFrame(frame("f1", { rotation: 0 })));
+    store.dispatch(rotateFramesBy(["f1"], -90));
+    expect(store.getProject().frames[0]?.rotation).toBe(270);
   });
 });
 
