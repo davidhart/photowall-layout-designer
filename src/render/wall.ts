@@ -168,6 +168,45 @@ export interface DragOffset {
   ids: ReadonlySet<string>;
   dx: number;
   dy: number;
+  guides?: { vertical: number[]; horizontal: number[] };
+}
+
+/** Snap guide color. */
+const GUIDE_COLOR = "#ff2d6c";
+
+/** Builds the snap-guide overlay lines spanning the current viewBox. */
+function buildGuides(
+  guides: { vertical: number[]; horizontal: number[] },
+  viewBox: AABB,
+): SVGGElement {
+  const g = svgEl("g", { class: "snap-guides" });
+  for (const x of guides.vertical) {
+    g.appendChild(
+      svgEl("line", {
+        x1: x,
+        y1: viewBox.y,
+        x2: x,
+        y2: viewBox.y + viewBox.height,
+        stroke: GUIDE_COLOR,
+        "stroke-width": 1,
+        "vector-effect": "non-scaling-stroke",
+      }),
+    );
+  }
+  for (const y of guides.horizontal) {
+    g.appendChild(
+      svgEl("line", {
+        x1: viewBox.x,
+        y1: y,
+        x2: viewBox.x + viewBox.width,
+        y2: y,
+        stroke: GUIDE_COLOR,
+        "stroke-width": 1,
+        "vector-effect": "non-scaling-stroke",
+      }),
+    );
+  }
+  return g;
 }
 
 export function buildWallSvg(
@@ -204,6 +243,10 @@ export function buildWallSvg(
         ? { ...frame, x: frame.x + drag.dx, y: frame.y + drag.dy }
         : frame;
     svg.appendChild(renderFrame(drawn, photo, selection.has(frame.id)));
+  }
+
+  if (drag?.guides) {
+    svg.appendChild(buildGuides(drag.guides, viewBox));
   }
 
   return svg;

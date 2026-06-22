@@ -27,7 +27,12 @@ export class WallView {
     const viewBox = ui.viewBox ?? defaultViewBox(project);
     const selection = new Set(ui.selection.frameIds);
     const drag = ui.drag
-      ? { ids: new Set(ui.drag.ids), dx: ui.drag.dx, dy: ui.drag.dy }
+      ? {
+          ids: new Set(ui.drag.ids),
+          dx: ui.drag.dx,
+          dy: ui.drag.dy,
+          guides: ui.drag.guides,
+        }
       : null;
     const svg = buildWallSvg(project, viewBox, selection, drag);
     // Replace only our own <svg>, leaving sibling overlays (e.g. zoom

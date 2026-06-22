@@ -1,3 +1,4 @@
+import { outerAABB } from "../model/geometry";
 import { deleteFrames, moveFrames } from "../state/commands";
 import type { Store } from "../state/store";
 import {
@@ -6,6 +7,7 @@ import {
   toggleSelection,
   unionSelection,
 } from "./selection";
+import { computeSnap, unionAABB } from "./snapping";
 import { pxToCm, scaleOf } from "./viewport";
 
 /** Pixels the pointer must travel before a press becomes a drag. */
@@ -107,10 +109,31 @@ export class InteractionController {
       const r = this.rect();
       if (!vb || r.width <= 0) return;
       const scale = scaleOf(vb, r.width);
+      const rawDx = dxPx / scale;
+      const rawDy = dyPx / scale;
+
+      // Snap the moving group's outer bounding box against the other frames.
+      const project = this.store.getProject();
+      const moving = new Set(this.dragIds);
+      const movingBoxes = project.frames
+        .filter((f) => moving.has(f.id))
+        .map((f) => {
+          const b = outerAABB(f);
+          return { ...b, x: b.x + rawDx, y: b.y + rawDy };
+        });
+      const otherBoxes = project.frames
+        .filter((f) => !moving.has(f.id))
+        .map(outerAABB);
+      const groupBox = unionAABB(movingBoxes);
+      const snap = groupBox
+        ? computeSnap(groupBox, otherBoxes)
+        : { dx: 0, dy: 0, guides: { vertical: [], horizontal: [] } };
+
       this.store.setDrag({
         ids: this.dragIds,
-        dx: dxPx / scale,
-        dy: dyPx / scale,
+        dx: rawDx + snap.dx,
+        dy: rawDy + snap.dy,
+        guides: snap.guides,
       });
     } else if (this.mode === "marquee") {
       this.updateMarquee(event.clientX, event.clientY);

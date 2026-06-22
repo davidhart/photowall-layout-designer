@@ -95,12 +95,12 @@ completed.
 
 ## Phase 6 — Snapping (during move)
 
-- [ ] Compute snap candidates in **cm** against other frames' **outer edges**.
-- [ ] **Alignment snap**: top/bottom/left/right edges + center lines, within
+- [x] Compute snap candidates in **cm** against other frames' **outer edges**.
+- [x] **Alignment snap**: top/bottom/left/right edges + center lines, within
       **0.5 cm** tolerance.
-- [ ] **Spacing snap**: match horizontal/vertical gaps to nearby frame gaps.
-- [ ] Render **snap guide** indicators while dragging.
-- [ ] Snapping works for group moves (snap the group's bounding box).
+- [x] **Spacing snap**: match horizontal/vertical gaps to nearby frame gaps.
+- [x] Render **snap guide** indicators while dragging.
+- [x] Snapping works for group moves (snap the group's bounding box).
 
 ## Phase 7 — Left panel & tabs (UI shell)
 

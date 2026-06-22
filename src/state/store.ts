@@ -12,6 +12,8 @@ export interface DragState {
   ids: string[];
   dx: number;
   dy: number;
+  /** snap guide lines to render while dragging (cm positions) */
+  guides?: { vertical: number[]; horizontal: number[] };
 }
 
 export interface UIState {
