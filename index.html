@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Photowall Layout Designer</title>
+  </head>
+  <body>
+    <div id="app">
+      <!-- Top toolbar: project-level actions -->
+      <header id="toolbar" class="toolbar">
+        <span class="toolbar__title">Photowall Layout Designer</span>
+        <div class="toolbar__actions">
+          <button type="button" data-action="new">New</button>
+          <button type="button" data-action="save">Save</button>
+          <button type="button" data-action="load">Load</button>
+          <button type="button" data-action="bom">Generate Bill of Materials</button>
+        </div>
+      </header>
+
+      <!-- Main wall view: zoomable / pannable SVG canvas -->
+      <main id="wall-view" class="wall-view">
+        <!-- SVG wall is injected here by the renderer -->
+      </main>
+
+      <!-- Left floating panel: Settings / Photos / Frames tabs -->
+      <aside id="left-panel" class="left-panel">
+        <nav class="left-panel__tabs" role="tablist">
+          <button type="button" role="tab" data-tab="settings" aria-selected="true">Settings</button>
+          <button type="button" role="tab" data-tab="photos">Photos</button>
+          <button type="button" role="tab" data-tab="frames">Frames</button>
+        </nav>
+        <div class="left-panel__body">
+          <section class="tab-panel" data-tab-panel="settings"></section>
+          <section class="tab-panel" data-tab-panel="photos" hidden></section>
+          <section class="tab-panel" data-tab-panel="frames" hidden></section>
+        </div>
+      </aside>
+
+      <!-- Floating frame properties panel (shown on selection) -->
+      <aside id="properties-panel" class="properties-panel" hidden></aside>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

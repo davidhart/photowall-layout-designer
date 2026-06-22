@@ -20,13 +20,13 @@ completed.
 
 ## Phase 0 — Project scaffold
 
-- [ ] `npm init` and install **Vite** + **TypeScript**.
-- [ ] Add `vite-plugin-singlefile` (or equivalent) so `vite build` emits one
+- [x] `npm init` and install **Vite** + **TypeScript**.
+- [x] Add `vite-plugin-singlefile` (or equivalent) so `vite build` emits one
       self-contained `.html`.
-- [ ] Configure `tsconfig.json` (strict mode).
-- [ ] Create `index.html` shell with three layout regions: **top toolbar**,
+- [x] Configure `tsconfig.json` (strict mode).
+- [x] Create `index.html` shell with three layout regions: **top toolbar**,
       **left floating panel**, **main wall view**. Skeleton CSS for the layout.
-- [ ] Confirm `vite dev` serves and `vite build` produces a single inlined HTML
+- [x] Confirm `vite dev` serves and `vite build` produces a single inlined HTML
       file that opens standalone.
 
 ## Phase 1 — Domain model, units & geometry (pure, no UI)

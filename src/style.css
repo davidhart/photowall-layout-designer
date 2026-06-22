@@ -1,0 +1,141 @@
+:root {
+  --toolbar-height: 48px;
+  --panel-width: 280px;
+  --bg: #2b2b2f;
+  --surface: #f7f7f8;
+  --surface-border: #d6d6db;
+  --text: #1d1d1f;
+  --accent: #2b6cff;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+#app {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background: var(--bg);
+}
+
+/* ---- Top toolbar ---- */
+.toolbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--toolbar-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--surface-border);
+  z-index: 20;
+}
+
+.toolbar__title {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.toolbar__actions {
+  display: flex;
+  gap: 8px;
+}
+
+button {
+  font: inherit;
+  padding: 6px 12px;
+  border: 1px solid var(--surface-border);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--text);
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: var(--accent);
+}
+
+/* ---- Main wall view ---- */
+.wall-view {
+  position: absolute;
+  top: var(--toolbar-height);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  touch-action: none;
+}
+
+.wall-view svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---- Left floating panel ---- */
+.left-panel {
+  position: absolute;
+  top: calc(var(--toolbar-height) + 16px);
+  left: 16px;
+  width: var(--panel-width);
+  max-height: calc(100vh - var(--toolbar-height) - 32px);
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+  z-index: 10;
+  overflow: hidden;
+}
+
+.left-panel__tabs {
+  display: flex;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.left-panel__tabs button {
+  flex: 1;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  padding: 10px 8px;
+  font-weight: 500;
+}
+
+.left-panel__tabs button[aria-selected="true"] {
+  color: var(--accent);
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+.left-panel__body {
+  padding: 12px;
+  overflow-y: auto;
+}
+
+/* ---- Frame properties panel ---- */
+.properties-panel {
+  position: absolute;
+  top: calc(var(--toolbar-height) + 16px);
+  right: 16px;
+  width: 240px;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+  padding: 12px;
+  z-index: 10;
+}
