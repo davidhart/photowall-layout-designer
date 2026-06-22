@@ -172,11 +172,11 @@ completed.
 
 ## Phase 13 — Build, cross-browser & polish
 
-- [ ] Verify production **single-file build** opens and works standalone.
-- [ ] Sanity-check across browsers (note HEIC only on native-support browsers).
-- [ ] Edge cases: empty project, very large/small walls, many overlapping
+- [x] Verify production **single-file build** opens and works standalone.
+- [x] Sanity-check across browsers (note HEIC only on native-support browsers).
+- [x] Edge cases: empty project, very large/small walls, many overlapping
       frames, custom-size frames, rotation + passpartout combinations.
-- [ ] Final pass on the deferred items in `DESIGN.md` Open Questions (HEX
+- [x] Final pass on the deferred items in `DESIGN.md` Open Questions (HEX
       colors, extra passpartout sizes, snap-guide visuals, zoom/pan bindings).
 
 ---

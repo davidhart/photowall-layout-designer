@@ -32,8 +32,3 @@ export function h<K extends keyof HTMLElementTagNameMap>(
   }
   return node;
 }
-
-/** Replaces all children of `parent` with `nodes`. */
-export function replaceChildren(parent: Element, ...nodes: Node[]): void {
-  parent.replaceChildren(...nodes);
-}
