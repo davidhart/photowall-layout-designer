@@ -1,6 +1,6 @@
 import { createEmptyFrame, createFrameForPhoto } from "../model/frameFactory";
 import { importAndAddPhotos } from "../photo/photoService";
-import { addFrame, setFramePhoto } from "../state/commands";
+import { addFrame, placePhotoInFrame } from "../state/commands";
 import type { Store } from "../state/store";
 import { DND_FRAME_SIZE, DND_PHOTO_ID } from "../ui/dnd";
 import { pxToCm } from "./viewport";
@@ -87,8 +87,9 @@ export class DropController {
         if (errors.length) this.onErrors(errors);
         if (added.length === 0) return;
         if (frameId) {
-          // Fill/replace the targeted frame with the first imported photo.
-          this.store.dispatch(setFramePhoto(frameId, added[0]!.id));
+          // Fill/replace the targeted frame with the first imported photo,
+          // orienting the frame to the photo.
+          this.store.dispatch(placePhotoInFrame(frameId, added[0]!.id));
         } else {
           added.forEach((photo, i) =>
             this.createPhotoFrame(photo.id, point.x + i * CASCADE, point.y + i * CASCADE),
@@ -102,7 +103,7 @@ export class DropController {
     const photoId = dt.getData(DND_PHOTO_ID);
     if (photoId) {
       if (frameId) {
-        this.store.dispatch(setFramePhoto(frameId, photoId));
+        this.store.dispatch(placePhotoInFrame(frameId, photoId));
       } else {
         this.createPhotoFrame(photoId, point.x, point.y);
       }

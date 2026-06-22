@@ -192,20 +192,34 @@ placeholder) or **contain a photo**.
   tab) places that photo in the frame.
 - Dragging a photo onto a frame that already contains a photo **replaces** the
   existing photo.
+- In **both** cases the frame is **re-oriented to match the photo** (see Frame
+  orientation): a landscape photo dropped onto a portrait frame turns the frame
+  landscape, and vice versa.
 
 ### Frame orientation
 
 - Frame orientation (portrait / landscape) is **automatically derived from the
-  original photo's dimensions / orientation** when a photo is placed.
-- This auto-orientation can be **overridden by rotating** the frame manually
-  (see Properties → Rotation).
+  original photo's dimensions / orientation** whenever a photo is placed —
+  including when filling or replacing the photo in an existing frame. If the
+  photo's orientation differs from the frame's current aperture orientation, the
+  aperture's width and height are **swapped** so the photo sits the right way up
+  in a frame of the matching orientation (a landscape photo in a landscape
+  frame, a portrait photo in a portrait frame).
+- Placing a photo **re-derives** orientation and therefore **clears any manual
+  rotation**. Afterwards this auto-orientation can be **overridden by rotating**
+  the frame manually (see Properties → Rotation); rotation rotates **both the
+  image and the frame together**, so a landscape image in a (rotated) frame
+  still reads correctly.
 
 ### Photo fitting within a frame
 
-- If the photo's **aspect ratio matches** the frame's aperture aspect ratio →
-  render as an **exact fit** (no cropping, no letterboxing).
-- If the photo **does not match** → use **scale-to-fit** so the whole photo is
-  visible within the frame aperture.
+- The photo is rendered to **cover** the frame's aperture (its effective photo
+  area): it is scaled so its **smaller edge fills the aperture**, the longer
+  edge overflows, and the overflow is **cropped** to the aperture. This leaves
+  **no white gaps** around the photo.
+- If the photo's **aspect ratio matches** the aperture's, cover degenerates to
+  an **exact fit** (no cropping). Because frames are oriented to the photo
+  (above), a matching photo is the common case.
 
 ### Frame color
 

@@ -11,8 +11,10 @@ completed.
 - The SVG **`viewBox` is expressed in centimeters**. Zoom/pan = adjusting the
   viewBox. All geometry math stays in real-world cm; cm→px is only the final
   viewBox→viewport mapping.
-- Photo fit = SVG `preserveAspectRatio="xMidYMid meet"` (contain) inside an
-  aperture clip. "Exact fit" is just the case where aspect ratios match.
+- Photo fit = SVG `preserveAspectRatio="xMidYMid slice"` (cover) clipped to the
+  aperture — the photo's smaller edge fills the aperture and the overflow is
+  cropped (no white gaps). "Exact fit" is just the case where aspect ratios
+  match. Placing a photo re-orients the frame to the photo's orientation.
 - Frames stay **axis-aligned** (90° rotation only), so all snapping/bounds math
   can use simple AABBs.
 
@@ -67,9 +69,9 @@ completed.
   - [x] Outer moulding rectangle in the frame color.
   - [x] Mat/passpartout region (between aperture and inner window) when set.
   - [x] Aperture / inner-window area.
-  - [x] Photo via `<image>` with `preserveAspectRatio="xMidYMid meet"` clipped
-        to the aperture (handles both exact-fit and scale-to-fit; letterbox
-        backing color defined here).
+  - [x] Photo via `<image>` with `preserveAspectRatio="xMidYMid slice"` (cover)
+        clipped to the aperture (smaller edge fills, overflow cropped, no white
+        gaps; exact-fit is the matching-aspect case).
   - [x] Empty frame → **white rectangle** in the center instead of a photo.
   - [x] Apply **90° rotation** transform (image + frame together).
 - [x] Render selection highlight(s) for selected frame(s).

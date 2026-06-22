@@ -1,3 +1,4 @@
+import { orientationFromPixels } from "../model/geometry";
 import type {
   Frame,
   FrameColor,
@@ -87,9 +88,40 @@ export function rotateFramesBy(ids: readonly string[], delta: number): Command {
   });
 }
 
-/** Places (or replaces) the photo in a frame. */
-export function setFramePhoto(id: string, photoId: string | null): Command {
-  return updateFrames([id], { photoId });
+/**
+ * Places (or replaces) a photo in a frame and re-derives the frame's
+ * orientation from the photo: if the photo's orientation differs from the
+ * frame's aperture orientation, the aperture's width/height are swapped so a
+ * landscape photo sits in a landscape frame (and portrait in portrait), and any
+ * manual rotation is cleared. A photo placed always re-derives orientation;
+ * subsequent manual rotation overrides it (see DESIGN.md → Frame orientation).
+ */
+export function placePhotoInFrame(frameId: string, photoId: string): Command {
+  return (p) => {
+    const photo = p.photos.find((ph) => ph.id === photoId);
+    return {
+      ...p,
+      frames: p.frames.map((f) => {
+        if (f.id !== frameId) return f;
+        if (!photo) return { ...f, photoId };
+        const photoOrientation = orientationFromPixels(
+          photo.pixelWidth,
+          photo.pixelHeight,
+        );
+        const apertureOrientation =
+          f.aperture.width > f.aperture.height ? "landscape" : "portrait";
+        if (photoOrientation === apertureOrientation) {
+          return { ...f, photoId };
+        }
+        return {
+          ...f,
+          photoId,
+          aperture: { width: f.aperture.height, height: f.aperture.width },
+          rotation: 0,
+        };
+      }),
+    };
+  };
 }
 
 /** Adds a photo to the project. */

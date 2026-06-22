@@ -49,7 +49,7 @@ describe("renderFrame", () => {
     const g = renderFrame(frame({ photoId: "p1" }), photo, false);
     const image = g.querySelector("image");
     expect(image).not.toBeNull();
-    expect(image?.getAttribute("preserveAspectRatio")).toBe("xMidYMid meet");
+    expect(image?.getAttribute("preserveAspectRatio")).toBe("xMidYMid slice");
     expect(image?.getAttribute("href")).toBe(photo.dataUrl);
   });
 

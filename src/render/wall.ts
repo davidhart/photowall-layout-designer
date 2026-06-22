@@ -92,7 +92,8 @@ export function renderFrame(
     photoH = inner.height;
   }
 
-  // Photo backing (also the letterbox color and the empty-frame white center).
+  // White backing: the empty-frame center. (Photos cover the aperture, so this
+  // is normally hidden behind the image.)
   g.appendChild(
     svgEl("rect", {
       x: -photoW / 2,
@@ -109,9 +110,10 @@ export function renderFrame(
       y: -photoH / 2,
       width: photoW,
       height: photoH,
-      // "meet" = contain: whole photo visible; exact fit is just the matching
-      // aspect-ratio case. Letterbox shows the backing color above.
-      preserveAspectRatio: "xMidYMid meet",
+      // "slice" = cover: the photo's smallest edge fills the aperture and any
+      // overflow on the longer edge is cropped (no white gaps). Exact fit is
+      // just the matching aspect-ratio case. The <image> rect clips overflow.
+      preserveAspectRatio: "xMidYMid slice",
     });
     setHref(image, photo.dataUrl);
     g.appendChild(image);

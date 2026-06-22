@@ -6,6 +6,7 @@ import {
   addPhoto,
   deleteFrames,
   moveFrames,
+  placePhotoInFrame,
   recolorFrames,
   removePhoto,
   rotateFramesBy,
@@ -136,6 +137,43 @@ describe("removePhoto empties frames using it", () => {
 
     expect(store.getProject().photos).toHaveLength(0);
     expect(store.getProject().frames.every((f) => f.photoId === null)).toBe(true);
+  });
+});
+
+describe("placePhotoInFrame orients the frame to the photo", () => {
+  function landscapePhoto(id: string): Photo {
+    return { ...photo(id), pixelWidth: 4000, pixelHeight: 3000 };
+  }
+
+  it("leaves a matching-orientation frame unchanged (just sets photoId)", () => {
+    const store = new Store();
+    store.dispatch(addPhoto(photo("p1"))); // portrait
+    store.dispatch(addFrame(frame("f1"))); // portrait aperture 21x29.7
+    store.dispatch(placePhotoInFrame("f1", "p1"));
+    const f = store.getProject().frames[0]!;
+    expect(f.photoId).toBe("p1");
+    expect(f.aperture).toEqual({ width: 21, height: 29.7 });
+  });
+
+  it("swaps the aperture for a mismatched orientation (portrait frame, landscape photo)", () => {
+    const store = new Store();
+    store.dispatch(addPhoto(landscapePhoto("p1")));
+    store.dispatch(addFrame(frame("f1", { rotation: 90 })));
+    store.dispatch(placePhotoInFrame("f1", "p1"));
+    const f = store.getProject().frames[0]!;
+    expect(f.aperture).toEqual({ width: 29.7, height: 21 });
+    // re-deriving orientation clears the manual rotation
+    expect(f.rotation).toBe(0);
+  });
+
+  it("is undoable", () => {
+    const store = new Store();
+    store.dispatch(addPhoto(landscapePhoto("p1")));
+    store.dispatch(addFrame(frame("f1")));
+    store.dispatch(placePhotoInFrame("f1", "p1"));
+    store.undo();
+    expect(store.getProject().frames[0]?.photoId).toBeNull();
+    expect(store.getProject().frames[0]?.aperture).toEqual({ width: 21, height: 29.7 });
   });
 });
 
