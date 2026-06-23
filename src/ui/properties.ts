@@ -1,14 +1,18 @@
 import { DEFAULT_FRAME_COLORS } from "../model/colors";
 import { orientSize } from "../model/geometry";
 import type { Frame, FrameColor, PasspartoutSize, Project } from "../model/types";
+import { importAndAddPhotos } from "../photo/photoService";
 import {
   addCustomColor,
+  placePhotoInFrame,
   recolorFrames,
   rotateFramesBy,
   updateFrames,
 } from "../state/commands";
 import type { Store } from "../state/store";
 import { h } from "./dom";
+
+export type PropertiesErrorHandler = (message: string) => void;
 
 /**
  * Floating frame-properties panel. Shows on selection: full controls for a
@@ -22,6 +26,7 @@ export class PropertiesPanel {
   constructor(
     private readonly el: HTMLElement,
     private readonly store: Store,
+    private readonly onError: PropertiesErrorHandler = () => {},
   ) {
     this.store.subscribe(() => this.render());
     this.render();
@@ -68,6 +73,7 @@ export class PropertiesPanel {
   private renderSingle(frame: Frame, project: Project): void {
     this.el.replaceChildren(
       h("h3", { text: "Frame" }),
+      this.choosePhotoControl(frame),
       this.sizeControl(frame, project),
       frame.standardSizeId === null ? this.customSizeControl(frame) : "",
       this.thicknessControl(frame),
@@ -95,6 +101,35 @@ export class PropertiesPanel {
       h("span", { text: label }),
       control,
     ]);
+  }
+
+  private choosePhotoControl(frame: Frame): HTMLElement {
+    const fileInput = h("input", {
+      type: "file",
+      accept: "image/jpeg,image/png,image/heic,image/heif",
+      style: "display:none",
+      onchange: (e: Event) => {
+        const input = e.target as HTMLInputElement;
+        // Snapshot before resetting — clearing the input empties the live
+        // FileList and would drop the picked file mid-import.
+        const files = input.files ? Array.from(input.files) : [];
+        input.value = "";
+        if (files.length === 0) return;
+        void importAndAddPhotos(this.store, files).then(({ added, errors }) => {
+          if (errors.length) this.onError(errors.join("\n"));
+          const photo = added[0];
+          if (photo) this.store.dispatch(placePhotoInFrame(frame.id, photo.id));
+        });
+      },
+    }) as HTMLInputElement;
+    const label = frame.photoId === null ? "Choose Photo" : "Replace Photo";
+    const button = h("button", {
+      type: "button",
+      class: "choose-photo",
+      text: label,
+      onclick: () => fileInput.click(),
+    });
+    return h("div", { class: "prop-field" }, [button, fileInput]);
   }
 
   private sizeControl(frame: Frame, project: Project): HTMLElement {

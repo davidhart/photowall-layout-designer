@@ -7,8 +7,6 @@ import {
   loadPalette,
   loadProjectFromStorage,
 } from "./persistence/storage";
-import { importAndAddPhotos } from "./photo/photoService";
-import { removePhoto } from "./state/commands";
 import { Store } from "./state/store";
 import { LeftPanel } from "./ui/panel";
 import { PropertiesPanel } from "./ui/properties";
@@ -53,31 +51,11 @@ function boot(): void {
 
   new ViewportControls(wallContainer, store);
   new InteractionController(wallContainer, store);
-  new LeftPanel(store, {
-    onAddPhotos: (files) => {
-      void importAndAddPhotos(store, files).then(({ errors }) => showErrors(errors));
-    },
-    onRemovePhoto: (photoId) => {
-      const inUse = store
-        .getProject()
-        .frames.filter((f) => f.photoId === photoId).length;
-      if (inUse > 0) {
-        const ok = confirm(
-          `This photo is used by ${inUse} frame${inUse > 1 ? "s" : ""}. ` +
-            `Removing it will empty ${inUse > 1 ? "those frames" : "that frame"}. Continue?`,
-        );
-        if (!ok) return;
-      }
-      store.dispatch(removePhoto(photoId));
-    },
-  });
-
-  const drops = new DropController(wallContainer, store, showErrors);
-  const photosPanel = document.querySelector<HTMLElement>('[data-tab-panel="photos"]');
-  if (photosPanel) drops.attachPhotosPanel(photosPanel);
+  new LeftPanel(store);
+  new DropController(wallContainer, store, showErrors);
 
   const propsEl = document.getElementById("properties-panel");
-  if (propsEl) new PropertiesPanel(propsEl, store);
+  if (propsEl) new PropertiesPanel(propsEl, store, (m) => showErrors([m]));
 
   attachAutosave(store, (message) => showErrors([message]));
   initToolbar(store, {

@@ -386,6 +386,10 @@ input[type="color"] {
   flex: 1;
 }
 
+.choose-photo {
+  width: 100%;
+}
+
 /* ---- Bill of Materials (print view) ---- */
 .bom-overlay {
   position: fixed;

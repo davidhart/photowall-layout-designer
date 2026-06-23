@@ -77,8 +77,8 @@ On load, the view **fits the whole wall to the viewport**. Zoom range is roughly
   multiple frames are selected, dragging moves them **together as a group**,
   preserving their relative positions.
 - **Delete** — selected frame(s) can be deleted (e.g. Delete/Backspace key).
-- **Drop targets** — the wall accepts dropped photos (from the filesystem or the
-  Photos tab) and dropped empty frames (from the Frames tab).
+- **Drop targets** — the wall accepts dropped photos (from the filesystem) and
+  dropped empty frames (from the Frames tab).
 
 Frames may **overlap** each other and may extend **beyond the wall bounds** —
 neither is constrained.
@@ -93,10 +93,10 @@ neither is constrained.
 
 ## Left Floating Panel — Project
 
-A floating panel docked on the left contains the project, organized into **three
+A floating panel docked on the left contains the project, organized into **two
 tabs**:
 
-### 1. Settings Tab
+### 1. Project Tab
 
 - Configure the **wall / canvas dimensions** (real-world size, in cm). Default
   wall size: **200 × 150 cm**.
@@ -115,34 +115,34 @@ tabs**:
   customized later (e.g. adding `A3 – 5 cm` style entries); the data model should
   allow arbitrary named inner-window sizes in cm.
 
-### 2. Photos Tab
+### 2. Frames Tab
 
-- Shows all selected photos for the project.
-- An **Add** button opens a file picker to select more photos.
-- Photos can be **dragged from the local filesystem onto the panel here** to add
-  them to the project.
-- Photos can be **dragged from this tab onto the wall**, which creates a frame on
-  the wall containing that photo.
-- **Removing a photo** that is currently used by one or more frames prompts a
-  **warning**. If accepted, the photo is removed and every frame using it is
-  **emptied** (reverted to an empty placeholder frame).
-
-### 3. Frames Tab
-
-- Presents a set of **standard-size empty frames**.
+- Presents a set of **standard-size empty frames** plus a generic **Custom**
+  template.
 - Empty frames can be **dragged into the wall as placeholders** (frames with no
   photo yet).
+- Whenever the wall contains one or more **custom-sized frames** (a frame whose
+  size does not match a standard size), each distinct custom aperture is also
+  surfaced in this list as its own draggable template, so the same custom size
+  can be added again without re-entering dimensions. Templates dedupe by
+  aperture (width × height in cm).
 
 ---
 
 ## Photos
 
-- The set of photos in the project lives in the Photos tab.
+- The project still tracks an internal set of photos (for serialization and so
+  a placed photo survives Save / Load round-trips), but **there is no Photos
+  tab** to browse them — photos enter the project only by being placed on the
+  wall or into a frame.
 - Ways to add a photo to the project:
-  1. **Add** button (file picker) in the Photos tab.
-  2. **Drag from the filesystem** onto the Photos tab.
-  3. **Drag from the filesystem onto the wall** — this both adds the photo to the
-     Photos tab *and* creates a frame for it on the wall.
+  1. **Drag from the filesystem onto the wall** — adds the photo to the project
+     *and* creates a frame for it.
+  2. **Drag from the filesystem onto an existing frame** — adds the photo to the
+     project and fills (or replaces) that frame.
+  3. **Choose Photo** button in the Frame Properties panel (with a frame
+     selected) — opens a file picker; behaves identically to dragging the
+     selected file onto the selected frame.
 - The tool reads each photo's **original dimensions / orientation** (pixel
   width/height) to derive aspect ratio and orientation.
 
@@ -188,11 +188,13 @@ placeholder) or **contain a photo**.
 
 ### Filling / replacing photos in a frame
 
-- Dragging a photo **onto an empty frame** (from the filesystem or the Photos
-  tab) places that photo in the frame.
+- Dragging a photo from the filesystem **onto an empty frame** places that
+  photo in the frame.
 - Dragging a photo onto a frame that already contains a photo **replaces** the
   existing photo.
-- In **both** cases the frame is **re-oriented to match the photo** (see Frame
+- Selecting a frame and clicking **Choose Photo** in the Frame Properties panel
+  is equivalent to dragging the chosen file onto that frame.
+- In **all** cases the frame is **re-oriented to match the photo** (see Frame
   orientation): a landscape photo dropped onto a portrait frame turns the frame
   landscape, and vice versa.
 
@@ -250,6 +252,9 @@ which the frame can be configured.
 
 Properties:
 
+- **Choose Photo** — a button that opens a file picker; the chosen image is
+  imported and placed in the selected frame, equivalent to dragging the file
+  onto the frame (orientation re-derived, manual rotation cleared).
 - **Frame size** — a dropdown to choose from the standard size options.
 - **Custom frame size** — a special "custom" frame type that lets the user
   specify the frame dimensions directly.

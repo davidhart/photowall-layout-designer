@@ -17,13 +17,11 @@ const BODY = `
     <main id="wall-view" class="wall-view"></main>
     <aside id="left-panel" class="left-panel">
       <nav class="left-panel__tabs">
-        <button role="tab" data-tab="settings" aria-selected="true">Settings</button>
-        <button role="tab" data-tab="photos">Photos</button>
+        <button role="tab" data-tab="project" aria-selected="true">Project</button>
         <button role="tab" data-tab="frames">Frames</button>
       </nav>
       <div class="left-panel__body">
-        <section class="tab-panel" data-tab-panel="settings"></section>
-        <section class="tab-panel" data-tab-panel="photos" hidden></section>
+        <section class="tab-panel" data-tab-panel="project"></section>
         <section class="tab-panel" data-tab-panel="frames" hidden></section>
       </div>
     </aside>
@@ -84,8 +82,8 @@ describe("app boot (integration smoke)", () => {
     // Zoom controls overlay present.
     expect(document.querySelector(".zoom-controls")).not.toBeNull();
 
-    // Settings panel rendered some inputs.
-    const settings = document.querySelector('[data-tab-panel="settings"]');
+    // Project panel rendered some inputs.
+    const settings = document.querySelector('[data-tab-panel="project"]');
     expect(settings?.querySelectorAll("input").length).toBeGreaterThan(0);
 
     // Frames palette rendered.

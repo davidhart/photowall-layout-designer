@@ -2,19 +2,17 @@ import { createEmptyFrame, createFrameForPhoto } from "../model/frameFactory";
 import { importAndAddPhotos } from "../photo/photoService";
 import { addFrame, placePhotoInFrame } from "../state/commands";
 import type { Store } from "../state/store";
-import { DND_FRAME_SIZE, DND_PHOTO_ID } from "../ui/dnd";
+import { DND_FRAME_SIZE } from "../ui/dnd";
 import { pxToCm } from "./viewport";
 
 /** Cascade offset (cm) between frames created from a multi-photo drop. */
 const CASCADE = 4;
 
 /**
- * Wires drag-and-drop onto the wall and the Photos panel:
+ * Wires drag-and-drop onto the wall:
  * - Filesystem files → wall: import + create a frame per photo (or fill a
- *   targeted frame).
- * - Filesystem files → Photos panel: import only.
- * - Photo (from Photos tab) → wall: create a frame; → a frame: fill/replace.
- * - Standard/custom frame → wall: create an empty placeholder.
+ *   targeted frame with the first photo).
+ * - Standard/custom frame template → wall: create an empty placeholder.
  */
 export class DropController {
   constructor(
@@ -23,18 +21,6 @@ export class DropController {
     private readonly onErrors: (errors: string[]) => void = () => {},
   ) {
     this.attachWall();
-  }
-
-  /** Also enable dropping image files directly onto the Photos panel. */
-  attachPhotosPanel(panel: HTMLElement): void {
-    panel.addEventListener("dragover", this.allowDrop);
-    panel.addEventListener("drop", (e) => {
-      const files = e.dataTransfer?.files;
-      if (!files || files.length === 0) return;
-      e.preventDefault();
-      e.stopPropagation();
-      void this.importFiles(files);
-    });
   }
 
   private attachWall(): void {
@@ -66,12 +52,6 @@ export class DropController {
     return el?.getAttribute("data-frame-id") ?? null;
   }
 
-  private async importFiles(files: FileList): Promise<string[]> {
-    const { errors } = await importAndAddPhotos(this.store, files);
-    if (errors.length) this.onErrors(errors);
-    return errors;
-  }
-
   private onDrop = (event: DragEvent): void => {
     const dt = event.dataTransfer;
     if (!dt) return;
@@ -99,18 +79,7 @@ export class DropController {
       return;
     }
 
-    // 2) Photo dragged from the Photos tab.
-    const photoId = dt.getData(DND_PHOTO_ID);
-    if (photoId) {
-      if (frameId) {
-        this.store.dispatch(placePhotoInFrame(frameId, photoId));
-      } else {
-        this.createPhotoFrame(photoId, point.x, point.y);
-      }
-      return;
-    }
-
-    // 3) Standard / custom empty frame dragged from the Frames tab.
+    // 2) Standard / custom empty frame dragged from the Frames tab.
     const sizeId = dt.getData(DND_FRAME_SIZE);
     if (sizeId) {
       const { wall } = this.store.getProject();

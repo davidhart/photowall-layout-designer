@@ -131,7 +131,7 @@ export function addPhoto(photo: Photo): Command {
 
 /**
  * Removes a photo and empties every frame that referenced it (reverts those
- * frames to empty placeholders). See DESIGN.md → Photos tab.
+ * frames to empty placeholders).
  */
 export function removePhoto(photoId: string): Command {
   return (p) => ({

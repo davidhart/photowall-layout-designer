@@ -70,8 +70,22 @@ export function createFrameForPhoto(
 }
 
 /**
- * Creates an empty placeholder frame from a standard size id (or "custom"),
- * centered on the drop point.
+ * Parses a custom-aperture frame template id of the form "custom:<w>x<h>" (in
+ * cm). Returns the aperture or null if the id is not in that form.
+ */
+function parseCustomApertureId(sizeId: string): SizeCm | null {
+  const match = /^custom:([0-9]+(?:\.[0-9]+)?)x([0-9]+(?:\.[0-9]+)?)$/.exec(sizeId);
+  if (!match) return null;
+  const w = Number(match[1]);
+  const h = Number(match[2]);
+  if (!(w > 0) || !(h > 0)) return null;
+  return { width: w, height: h };
+}
+
+/**
+ * Creates an empty placeholder frame from a standard size id, "custom", or
+ * "custom:<w>x<h>" (a reusable custom-size template). Centered on the drop
+ * point.
  */
 export function createEmptyFrame(
   sizeId: string,
@@ -80,13 +94,14 @@ export function createEmptyFrame(
   centerX: number,
   centerY: number,
 ): Frame {
+  const customAperture = parseCustomApertureId(sizeId);
   const standard =
-    sizeId === "custom"
+    customAperture || sizeId === "custom"
       ? null
       : wall.standardSizes.find((s) => s.id === sizeId) ?? null;
   const aperture: SizeCm = standard
     ? { width: standard.width, height: standard.height }
-    : { ...CUSTOM_DEFAULT };
+    : customAperture ?? { ...CUSTOM_DEFAULT };
   const thickness = DEFAULT_FRAME_THICKNESS;
   const { x, y } = placeCentered(aperture, thickness, centerX, centerY);
 

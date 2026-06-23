@@ -1,34 +1,22 @@
 import { reconcilePasspartoutOptions, sizeToPasspartout } from "../model/settings";
-import type { PasspartoutSize, StandardSize } from "../model/types";
+import type { Frame, PasspartoutSize, StandardSize } from "../model/types";
 import { updateWall } from "../state/commands";
 import type { Store } from "../state/store";
-import { DND_FRAME_SIZE, DND_PHOTO_ID } from "./dnd";
+import { DND_FRAME_SIZE, encodeCustomFrameSizeId } from "./dnd";
 import { h } from "./dom";
 
-export interface PanelCallbacks {
-  /** Called with a snapshot of the files picked via the Photos → Add button. */
-  onAddPhotos?: (files: File[]) => void;
-  /** Called when the user clicks remove on a photo. */
-  onRemovePhoto?: (photoId: string) => void;
-}
-
 /**
- * Renders the left panel's three tabs (Settings / Photos / Frames) from store
- * state. Rebuilds only when the project reference changes, so view-only updates
+ * Renders the left panel's two tabs (Project / Frames) from store state.
+ * Rebuilds only when the project reference changes, so view-only updates
  * (pan/zoom/selection) don't disturb inputs mid-edit.
  */
 export class LeftPanel {
-  private settingsEl: HTMLElement;
-  private photosEl: HTMLElement;
+  private projectEl: HTMLElement;
   private framesEl: HTMLElement;
   private lastProject: unknown = null;
 
-  constructor(
-    private readonly store: Store,
-    private readonly callbacks: PanelCallbacks = {},
-  ) {
-    this.settingsEl = this.panel("settings");
-    this.photosEl = this.panel("photos");
+  constructor(private readonly store: Store) {
+    this.projectEl = this.panel("project");
     this.framesEl = this.panel("frames");
     this.store.subscribe(() => this.render());
     this.render();
@@ -44,14 +32,13 @@ export class LeftPanel {
     const project = this.store.getProject();
     if (project === this.lastProject) return;
     this.lastProject = project;
-    this.renderSettings();
-    this.renderPhotos();
+    this.renderProject();
     this.renderFrames();
   }
 
-  // ---- Settings tab ----
+  // ---- Project tab ----
 
-  private renderSettings(): void {
+  private renderProject(): void {
     const wall = this.store.getProject().wall;
 
     const dimInput = (label: string, value: number, key: "width" | "height") =>
@@ -81,7 +68,7 @@ export class LeftPanel {
       }),
     ]);
 
-    this.settingsEl.replaceChildren(
+    this.projectEl.replaceChildren(
       h("h3", { text: "Wall" }),
       h("div", { class: "field-row" }, [
         dimInput("Width (cm)", wall.width, "width"),
@@ -243,68 +230,17 @@ export class LeftPanel {
     );
   }
 
-  // ---- Photos tab ----
-
-  private renderPhotos(): void {
-    const photos = this.store.getProject().photos;
-
-    const fileInput = h("input", {
-      type: "file",
-      accept: "image/jpeg,image/png,image/heic,image/heif",
-      multiple: "true",
-      style: "display:none",
-      onchange: (e: Event) => {
-        const input = e.target as HTMLInputElement;
-        // Snapshot into an array before resetting the input — clearing it
-        // empties the live FileList and would drop files mid-import.
-        const files = input.files ? Array.from(input.files) : [];
-        input.value = "";
-        if (files.length) this.callbacks.onAddPhotos?.(files);
-      },
-    });
-
-    const addBtn = h("button", {
-      type: "button",
-      text: "+ Add photos",
-      onclick: () => fileInput.click(),
-    });
-
-    const list =
-      photos.length === 0
-        ? h("p", { class: "hint", text: "No photos yet. Add or drag images here." })
-        : h(
-            "div",
-            { class: "photo-grid" },
-            photos.map((p) =>
-              h("div", { class: "photo-item" }, [
-                h("img", {
-                  src: p.thumbnailDataUrl || p.dataUrl,
-                  alt: p.name,
-                  title: p.name,
-                  draggable: "true",
-                  ondragstart: (e: DragEvent) =>
-                    e.dataTransfer?.setData(DND_PHOTO_ID, p.id),
-                }),
-                h("button", {
-                  type: "button",
-                  class: "icon-btn photo-remove",
-                  title: "Remove",
-                  text: "✕",
-                  onclick: () => this.callbacks.onRemovePhoto?.(p.id),
-                }),
-              ]),
-            ),
-          );
-
-    this.photosEl.replaceChildren(addBtn, fileInput, list);
-  }
-
   // ---- Frames tab ----
 
   private renderFrames(): void {
-    const sizes = this.store.getProject().wall.standardSizes;
-    const items = sizes.map((size) => this.framePaletteItem(size));
+    const project = this.store.getProject();
+    const items = project.wall.standardSizes.map((size) =>
+      this.framePaletteItem(size),
+    );
     items.push(this.customFramePaletteItem());
+    for (const aperture of distinctCustomFrameApertures(project.frames)) {
+      items.push(this.customApertureItem(aperture));
+    }
     this.framesEl.replaceChildren(
       h("p", { class: "hint", text: "Drag a frame onto the wall." }),
       h("div", { class: "frame-palette" }, items),
@@ -348,4 +284,53 @@ export class LeftPanel {
       ],
     );
   }
+
+  private customApertureItem(aperture: { width: number; height: number }): HTMLElement {
+    const aspect = aperture.width / aperture.height;
+    const label = `${formatCm(aperture.width)}×${formatCm(aperture.height)}`;
+    return h(
+      "div",
+      {
+        class: "palette-item",
+        draggable: "true",
+        title: `Custom ${label} cm`,
+        ondragstart: (e: DragEvent) =>
+          e.dataTransfer?.setData(
+            DND_FRAME_SIZE,
+            encodeCustomFrameSizeId(aperture.width, aperture.height),
+          ),
+      },
+      [
+        h("div", {
+          class: "palette-thumb palette-thumb--custom",
+          style: `aspect-ratio:${aspect}`,
+        }),
+        h("span", { text: label }),
+      ],
+    );
+  }
+}
+
+/** Trim trailing zeros for a compact cm label (e.g. 21, 29.7). */
+function formatCm(n: number): string {
+  return Number.isInteger(n) ? String(n) : String(Number(n.toFixed(2)));
+}
+
+/**
+ * Distinct apertures of custom-sized frames currently on the wall, deduped by
+ * (width, height) so identical custom sizes coalesce to a single template.
+ */
+function distinctCustomFrameApertures(
+  frames: readonly Frame[],
+): { width: number; height: number }[] {
+  const seen = new Set<string>();
+  const result: { width: number; height: number }[] = [];
+  for (const f of frames) {
+    if (f.standardSizeId !== null) continue;
+    const key = `${f.aperture.width}x${f.aperture.height}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push({ width: f.aperture.width, height: f.aperture.height });
+  }
+  return result;
 }

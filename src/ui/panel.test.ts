@@ -1,62 +1,65 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from "vitest";
+import { addFrame } from "../state/commands";
 import { Store } from "../state/store";
+import type { Frame } from "../model/types";
 import { LeftPanel } from "./panel";
 
 const PANELS = `
-  <section data-tab-panel="settings"></section>
-  <section data-tab-panel="photos"></section>
+  <section data-tab-panel="project"></section>
   <section data-tab-panel="frames"></section>
 `;
 
-describe("Photos tab — Add photos file picker", () => {
+function customFrame(id: string, width: number, height: number): Frame {
+  return {
+    id,
+    x: 0,
+    y: 0,
+    aperture: { width, height },
+    standardSizeId: null,
+    thickness: 1,
+    passpartout: null,
+    color: "#1a1a1a",
+    rotation: 0,
+    photoId: null,
+  };
+}
+
+describe("LeftPanel — Frames palette", () => {
   beforeEach(() => {
     document.body.innerHTML = PANELS;
   });
 
-  it("renders a file input that allows selecting multiple images", () => {
+  it("renders one palette item per standard size plus a generic Custom template", () => {
     const store = new Store();
     new LeftPanel(store);
-
-    const input = document.querySelector<HTMLInputElement>(
-      '[data-tab-panel="photos"] input[type="file"]',
+    const items = document.querySelectorAll(
+      '[data-tab-panel="frames"] .palette-item',
     );
-    expect(input).not.toBeNull();
-    // The OS picker must allow multi-select.
-    expect(input!.multiple).toBe(true);
-    expect(input!.accept).toContain("image/");
+    // Default project ships ISO A0..A6 (7 sizes) + generic Custom.
+    expect(items.length).toBe(store.getProject().wall.standardSizes.length + 1);
   });
 
-  it("forwards a stable snapshot of every picked file (survives input reset)", () => {
+  it("surfaces each distinct custom aperture on the wall as its own template", () => {
     const store = new Store();
-    let received: File[] | null = null;
-    new LeftPanel(store, { onAddPhotos: (files) => (received = files) });
+    new LeftPanel(store);
+    const beforeCount = document.querySelectorAll(
+      '[data-tab-panel="frames"] .palette-item',
+    ).length;
 
-    const input = document.querySelector<HTMLInputElement>(
-      '[data-tab-panel="photos"] input[type="file"]',
-    )!;
-    const files = [
-      new File(["a"], "a.jpg", { type: "image/jpeg" }),
-      new File(["b"], "b.png", { type: "image/png" }),
-      new File(["c"], "c.jpg", { type: "image/jpeg" }),
-    ];
-    // jsdom has no DataTransfer; a length-bearing array stands in for FileList.
-    Object.defineProperty(input, "files", {
-      value: files as unknown as FileList,
-      configurable: true,
-    });
+    store.dispatch(addFrame(customFrame("f1", 25, 35)));
+    store.dispatch(addFrame(customFrame("f2", 25, 35))); // dupe — coalesces
+    store.dispatch(addFrame(customFrame("f3", 40, 50)));
 
-    input.dispatchEvent(new Event("change"));
+    const items = document.querySelectorAll(
+      '[data-tab-panel="frames"] .palette-item',
+    );
+    // +2 templates (25×35 and 40×50), not +3.
+    expect(items.length).toBe(beforeCount + 2);
 
-    // Simulate the live FileList being emptied (as the browser does on reset).
-    Object.defineProperty(input, "files", {
-      value: [] as unknown as FileList,
-      configurable: true,
-    });
-
-    expect(received).not.toBeNull();
-    // All three survive because the handler snapshotted into an array.
-    expect(received!.length).toBe(3);
-    expect(Array.isArray(received)).toBe(true);
+    // Labels should reflect the cm dimensions.
+    const labels = Array.from(items).map((el) => el.textContent ?? "");
+    expect(labels.some((t) => t.includes("25×35"))).toBe(true);
+    expect(labels.some((t) => t.includes("40×50"))).toBe(true);
   });
 });

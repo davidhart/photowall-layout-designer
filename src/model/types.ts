@@ -111,7 +111,7 @@ export interface Frame {
   photoId: string | null;
 }
 
-/** Wall + project configuration (the Settings tab edits this). */
+/** Wall + project configuration (the Project tab edits this). */
 export interface WallSettings {
   /** wall width in cm */
   width: number;
