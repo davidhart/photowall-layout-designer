@@ -82,9 +82,8 @@ export class DropController {
     // 2) Standard / custom empty frame dragged from the Frames tab.
     const sizeId = dt.getData(DND_FRAME_SIZE);
     if (sizeId) {
-      const { wall } = this.store.getProject();
       const color = this.store.getUI().lastFrameColor;
-      const frame = createEmptyFrame(sizeId, wall, color, point.x, point.y);
+      const frame = createEmptyFrame(sizeId, color, point.x, point.y);
       this.store.dispatch(addFrame(frame));
     }
   };
@@ -94,6 +93,6 @@ export class DropController {
     const photo = project.photos.find((p) => p.id === photoId);
     if (!photo) return;
     const color = this.store.getUI().lastFrameColor;
-    this.store.dispatch(addFrame(createFrameForPhoto(photo, project.wall, color, x, y)));
+    this.store.dispatch(addFrame(createFrameForPhoto(photo, color, x, y)));
   }
 }

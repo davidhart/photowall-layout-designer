@@ -1,5 +1,6 @@
 import { DEFAULT_FRAME_COLORS } from "../model/colors";
 import { orientSize } from "../model/geometry";
+import { standardPasspartoutOptions, standardSizes } from "../model/standards";
 import type { Frame, FrameColor, PasspartoutSize, Project } from "../model/types";
 import { importAndAddPhotos } from "../photo/photoService";
 import {
@@ -13,6 +14,9 @@ import type { Store } from "../state/store";
 import { h } from "./dom";
 
 export type PropertiesErrorHandler = (message: string) => void;
+
+/** Sentinel select value used to switch a passpartout to a Custom… inner window. */
+const PP_CUSTOM_VALUE = "__custom__";
 
 /**
  * Floating frame-properties panel. Shows on selection: full controls for a
@@ -74,7 +78,7 @@ export class PropertiesPanel {
     this.el.replaceChildren(
       h("h3", { text: "Frame" }),
       this.choosePhotoControl(frame),
-      this.sizeControl(frame, project),
+      this.sizeControl(frame),
       frame.standardSizeId === null ? this.customSizeControl(frame) : "",
       this.thicknessControl(frame),
       this.passpartoutControl(frame, project),
@@ -132,15 +136,16 @@ export class PropertiesPanel {
     return h("div", { class: "prop-field" }, [button, fileInput]);
   }
 
-  private sizeControl(frame: Frame, project: Project): HTMLElement {
+  private sizeControl(frame: Frame): HTMLElement {
+    const sizes = standardSizes();
     const select = h(
       "select",
       {
         onchange: (e: Event) =>
-          this.changeSize(frame, (e.target as HTMLSelectElement).value, project),
+          this.changeSize(frame, (e.target as HTMLSelectElement).value),
       },
       [
-        ...project.wall.standardSizes.map((s) =>
+        ...sizes.map((s) =>
           h("option", {
             value: s.id,
             text: s.name,
@@ -157,14 +162,16 @@ export class PropertiesPanel {
     return this.field("Size", select);
   }
 
-  private changeSize(frame: Frame, sizeId: string, project: Project): void {
+  private changeSize(frame: Frame, sizeId: string): void {
     const orientation =
       frame.aperture.width > frame.aperture.height ? "landscape" : "portrait";
     if (sizeId === "custom") {
-      this.store.dispatch(updateFrames([frame.id], { standardSizeId: null }));
+      this.store.dispatch(
+        updateFrames([frame.id], { standardSizeId: null, passpartout: null }),
+      );
       return;
     }
-    const size = project.wall.standardSizes.find((s) => s.id === sizeId);
+    const size = standardSizes().find((s) => s.id === sizeId);
     if (!size) return;
     const aperture = orientSize(size, orientation);
     // Clear passpartout on size change to avoid invalid combinations.
@@ -220,16 +227,30 @@ export class PropertiesPanel {
   }
 
   private passpartoutControl(frame: Frame, project: Project): HTMLElement {
-    const options: PasspartoutSize[] = frame.standardSizeId
-      ? project.wall.passpartoutOptions[frame.standardSizeId] ?? []
-      : [];
+    if (frame.standardSizeId === null) {
+      // Passpartouts are only meaningful on standard-size frames (the smaller
+      // standard sizes derive from the parent's standard size). Custom-size
+      // frames have no parent-size scope, so the control is omitted entirely.
+      return h("span", {});
+    }
+    const options = passpartoutOptionsFor(frame, project);
+    const activeId = frame.passpartout?.id ?? "";
+    const isCustomActive = activeId.startsWith("custom:");
+
     const select = h(
       "select",
       {
         onchange: (e: Event) => {
           const val = (e.target as HTMLSelectElement).value;
+          if (val === PP_CUSTOM_VALUE) {
+            // Switch to a fresh custom passpartout sized at half the aperture.
+            const w = round1(frame.aperture.width / 2);
+            const hh = round1(frame.aperture.height / 2);
+            this.setPasspartout(frame, makeCustomPasspartout(w, hh));
+            return;
+          }
           const found = options.find((o) => o.id === val) ?? null;
-          this.store.dispatch(updateFrames([frame.id], { passpartout: found }));
+          this.setPasspartout(frame, found);
         },
       },
       [
@@ -242,12 +263,50 @@ export class PropertiesPanel {
           h("option", {
             value: o.id,
             text: o.name,
-            ...(frame.passpartout?.id === o.id ? { selected: "true" } : {}),
+            ...(activeId === o.id ? { selected: "true" } : {}),
           }),
         ),
+        h("option", {
+          value: PP_CUSTOM_VALUE,
+          text: "Custom…",
+          ...(isCustomActive ? { selected: "true" } : {}),
+        }),
       ],
     );
-    return this.field("Passpartout", select);
+
+    const children: (Node | string)[] = [this.field("Passpartout", select)];
+    if (isCustomActive && frame.passpartout) {
+      children.push(this.customPasspartoutControl(frame, frame.passpartout));
+    }
+    return h("div", {}, children);
+  }
+
+  private customPasspartoutControl(
+    frame: Frame,
+    pp: PasspartoutSize,
+  ): HTMLElement {
+    const num = (key: "width" | "height") =>
+      h("input", {
+        class: "size-num",
+        type: "number",
+        min: "0.1",
+        step: "0.1",
+        value: String(pp[key]),
+        onchange: (e: Event) => {
+          const n = Number((e.target as HTMLInputElement).value);
+          if (!(n > 0)) return;
+          const next = { ...pp, [key]: n };
+          this.setPasspartout(frame, makeCustomPasspartout(next.width, next.height));
+        },
+      });
+    return this.field(
+      "Custom mat (cm)",
+      h("span", { class: "custom-size" }, [num("width"), " × ", num("height")]),
+    );
+  }
+
+  private setPasspartout(frame: Frame, pp: PasspartoutSize | null): void {
+    this.store.dispatch(updateFrames([frame.id], { passpartout: pp }));
   }
 
   private colorControl(activeHex: string | null, project: Project): HTMLElement {
@@ -327,4 +386,47 @@ export class PropertiesPanel {
       ]),
     ]);
   }
+}
+
+/** Round to 1 decimal cm for stable identity / display. */
+function round1(n: number): number {
+  return Math.round(n * 10) / 10;
+}
+
+/** A custom passpartout option keyed by its dimensions so duplicates coalesce. */
+function makeCustomPasspartout(width: number, height: number): PasspartoutSize {
+  const w = round1(width);
+  const hh = round1(height);
+  const label = `${w}×${hh}`;
+  return { id: `custom:${w}x${hh}`, name: label, width: w, height: hh };
+}
+
+/**
+ * The passpartout dropdown's options for a given frame: every default
+ * smaller-standard-size inner window for the frame's standard size, plus any
+ * custom-size passpartouts already in use on another frame of the same
+ * standard size (so a one-off custom mat becomes reusable across like
+ * frames). Deduped by id.
+ */
+function passpartoutOptionsFor(
+  frame: Frame,
+  project: Project,
+): PasspartoutSize[] {
+  if (frame.standardSizeId === null) return [];
+  const defaults = standardPasspartoutOptions()[frame.standardSizeId] ?? [];
+  const inUse: PasspartoutSize[] = [];
+  for (const other of project.frames) {
+    if (other.standardSizeId !== frame.standardSizeId) continue;
+    if (!other.passpartout) continue;
+    if (!other.passpartout.id.startsWith("custom:")) continue;
+    inUse.push(other.passpartout);
+  }
+  const seen = new Set<string>();
+  const result: PasspartoutSize[] = [];
+  for (const opt of [...defaults, ...inUse]) {
+    if (seen.has(opt.id)) continue;
+    seen.add(opt.id);
+    result.push(opt);
+  }
+  return result;
 }

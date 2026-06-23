@@ -4,8 +4,9 @@ import {
   orientationFromPixels,
   orientSize,
 } from "./geometry";
+import { standardSizes } from "./standards";
 import { newId } from "../state/ids";
-import type { Frame, Photo, SizeCm, WallSettings } from "./types";
+import type { Frame, Photo, SizeCm } from "./types";
 
 /** Longest aperture edge (cm) for a custom-size frame fallback. */
 const CUSTOM_TARGET_LONG = 30;
@@ -40,14 +41,13 @@ export function customApertureForPhoto(photo: Photo): SizeCm {
  */
 export function createFrameForPhoto(
   photo: Photo,
-  wall: WallSettings,
   color: string,
   centerX: number,
   centerY: number,
 ): Frame {
   const orientation = orientationFromPixels(photo.pixelWidth, photo.pixelHeight);
   const aspect = photo.pixelWidth / photo.pixelHeight;
-  const standard = nearestStandardSize(aspect, orientation, wall.standardSizes);
+  const standard = nearestStandardSize(aspect, orientation, standardSizes());
 
   const aperture = standard
     ? orientSize(standard, orientation)
@@ -89,7 +89,6 @@ function parseCustomApertureId(sizeId: string): SizeCm | null {
  */
 export function createEmptyFrame(
   sizeId: string,
-  wall: WallSettings,
   color: string,
   centerX: number,
   centerY: number,
@@ -98,7 +97,7 @@ export function createEmptyFrame(
   const standard =
     customAperture || sizeId === "custom"
       ? null
-      : wall.standardSizes.find((s) => s.id === sizeId) ?? null;
+      : standardSizes().find((s) => s.id === sizeId) ?? null;
   const aperture: SizeCm = standard
     ? { width: standard.width, height: standard.height }
     : customAperture ?? { ...CUSTOM_DEFAULT };

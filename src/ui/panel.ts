@@ -1,5 +1,5 @@
-import { reconcilePasspartoutOptions, sizeToPasspartout } from "../model/settings";
-import type { Frame, PasspartoutSize, StandardSize } from "../model/types";
+import { standardSizes } from "../model/standards";
+import type { Frame, StandardSize } from "../model/types";
 import { updateWall } from "../state/commands";
 import type { Store } from "../state/store";
 import { DND_FRAME_SIZE, encodeCustomFrameSizeId } from "./dnd";
@@ -75,170 +75,17 @@ export class LeftPanel {
         dimInput("Height (cm)", wall.height, "height"),
       ]),
       wallColor,
-      h("h3", { text: "Standard frame sizes" }),
-      this.renderSizesEditor(wall.standardSizes),
-      h("h3", { text: "Passpartout options" }),
-      this.renderPasspartoutEditor(wall.standardSizes, wall.passpartoutOptions),
-    );
-  }
-
-  private commitSizes(sizes: StandardSize[]): void {
-    const wall = this.store.getProject().wall;
-    this.store.dispatch(
-      updateWall({
-        standardSizes: sizes,
-        passpartoutOptions: reconcilePasspartoutOptions(
-          sizes,
-          wall.passpartoutOptions,
-        ),
-      }),
-    );
-  }
-
-  private renderSizesEditor(sizes: readonly StandardSize[]): HTMLElement {
-    const rows = sizes.map((size, index) =>
-      h("div", { class: "size-row" }, [
-        h("input", {
-          class: "size-name",
-          value: size.name,
-          onchange: (e: Event) => {
-            const next = sizes.map((s, i) =>
-              i === index
-                ? { ...s, name: (e.target as HTMLInputElement).value }
-                : s,
-            );
-            this.commitSizes(next);
-          },
-        }),
-        this.sizeNumber(sizes, index, "width"),
-        h("span", { text: "×" }),
-        this.sizeNumber(sizes, index, "height"),
-        h("button", {
-          type: "button",
-          class: "icon-btn",
-          title: "Remove",
-          text: "✕",
-          onclick: () => this.commitSizes(sizes.filter((_, i) => i !== index)),
-        }),
-      ]),
-    );
-
-    const addBtn = h("button", {
-      type: "button",
-      text: "+ Add size",
-      onclick: () => {
-        const id = `size_${Date.now().toString(36)}`;
-        const next: StandardSize[] = [
-          ...sizes,
-          { id, name: "Custom", width: 20, height: 30 },
-        ];
-        this.commitSizes(next);
-      },
-    });
-
-    return h("div", { class: "sizes-editor" }, [...rows, addBtn]);
-  }
-
-  private sizeNumber(
-    sizes: readonly StandardSize[],
-    index: number,
-    key: "width" | "height",
-  ): HTMLElement {
-    return h("input", {
-      class: "size-num",
-      type: "number",
-      min: "0.1",
-      step: "0.1",
-      value: String(sizes[index]![key]),
-      onchange: (e: Event) => {
-        const n = Number((e.target as HTMLInputElement).value);
-        if (!(n > 0)) return;
-        const next = sizes.map((s, i) => (i === index ? { ...s, [key]: n } : s));
-        this.commitSizes(next);
-      },
-    });
-  }
-
-  private renderPasspartoutEditor(
-    sizes: readonly StandardSize[],
-    options: Record<string, PasspartoutSize[]>,
-  ): HTMLElement {
-    const sections = sizes.map((size) => {
-      const current = options[size.id] ?? [];
-      const currentIds = new Set(current.map((o) => o.id));
-      // Candidates to add: any other standard size not already an option.
-      const candidates = sizes.filter(
-        (s) => s.id !== size.id && !currentIds.has(s.id),
-      );
-
-      const chips = current.map((opt) =>
-        h("span", { class: "chip" }, [
-          opt.name,
-          h("button", {
-            type: "button",
-            class: "chip-x",
-            text: "✕",
-            onclick: () =>
-              this.commitPasspartout(
-                size.id,
-                current.filter((o) => o.id !== opt.id),
-              ),
-          }),
-        ]),
-      );
-
-      const addSelect = h(
-        "select",
-        {
-          onchange: (e: Event) => {
-            const sel = (e.target as HTMLSelectElement).value;
-            const found = sizes.find((s) => s.id === sel);
-            if (found) {
-              this.commitPasspartout(size.id, [
-                ...current,
-                sizeToPasspartout(found),
-              ]);
-            }
-          },
-        },
-        [
-          h("option", { value: "", text: "+ add…" }),
-          ...candidates.map((c) =>
-            h("option", { value: c.id, text: c.name }),
-          ),
-        ],
-      );
-
-      return h("div", { class: "pp-section" }, [
-        h("div", { class: "pp-title", text: size.name }),
-        h("div", { class: "pp-chips" }, [
-          ...chips,
-          ...(candidates.length ? [addSelect] : []),
-        ]),
-      ]);
-    });
-
-    return h("div", { class: "pp-editor" }, sections);
-  }
-
-  private commitPasspartout(sizeId: string, list: PasspartoutSize[]): void {
-    const wall = this.store.getProject().wall;
-    this.store.dispatch(
-      updateWall({
-        passpartoutOptions: { ...wall.passpartoutOptions, [sizeId]: list },
-      }),
     );
   }
 
   // ---- Frames tab ----
 
   private renderFrames(): void {
-    const project = this.store.getProject();
-    const items = project.wall.standardSizes.map((size) =>
-      this.framePaletteItem(size),
-    );
+    const items = standardSizes().map((size) => this.framePaletteItem(size));
     items.push(this.customFramePaletteItem());
-    for (const aperture of distinctCustomFrameApertures(project.frames)) {
+    for (const aperture of distinctCustomFrameApertures(
+      this.store.getProject().frames,
+    )) {
       items.push(this.customApertureItem(aperture));
     }
     this.framesEl.replaceChildren(

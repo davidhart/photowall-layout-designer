@@ -104,16 +104,12 @@ tabs**:
 - Configure the **wall color** (background of the wall). Default **white**. This
   uses a plain **free color picker** — it does **not** use the frame custom-color
   palette logic (no saved swatches list).
-- Configure the list of **standard frame sizes** offered in the Frames tab and in
-  the frame properties dropdown. This list is **user-configurable**; the
-  **default set is the ISO A-series A0–A6** (A0, A1, A2, A3, A4, A5, A6).
-- Configure the **passpartout (inner-window) sizes** offered **per frame size**.
-  Each supported frame size has its own configurable list of selectable inner
-  windows. **Default:** a frame may select any **smaller standard size** as its
-  inner window (e.g. an **A3** frame defaults to offering **A4, A5, A6**). These
-  lists are kept **separately per supported frame size** so they can be
-  customized later (e.g. adding `A3 – 5 cm` style entries); the data model should
-  allow arbitrary named inner-window sizes in cm.
+
+The set of **standard frame sizes** (ISO A-series A0–A6) and the **default
+passpartout options per size** (every smaller standard size — e.g. A3 offers
+A4, A5, A6) are **hardcoded in app code** rather than configured here.
+Per-frame customization is done by picking **Custom…** in the Frame Properties
+panel (custom frame aperture, custom passpartout inner window).
 
 ### 2. Frames Tab
 
@@ -167,7 +163,9 @@ placeholder) or **contain a photo**.
   aperture to the passpartout's inner-window size. The mat fills the space
   between the frame aperture and the inner window. The selectable inner-window
   sizes depend on the frame size and **default to all smaller standard sizes**
-  (e.g. an A3 frame offers A4, A5, A6); see Settings.
+  (e.g. an A3 frame offers A4, A5, A6). Picking **Custom…** lets the user
+  enter arbitrary inner-window dimensions in cm (see Frame Properties Panel →
+  Passpartout). Passpartout is available only on standard-size frames.
 - The **effective photo print size** of a frame is the passpartout inner-window
   size if a passpartout is set, otherwise the frame's aperture size. (This is the
   value used by the Bill of Materials.)
@@ -260,9 +258,15 @@ Properties:
   specify the frame dimensions directly.
 - **Frame thickness** — width of the frame border (moulding), editable per
   frame. **Default 1 cm.**
-- **Passpartout (mat)** — optional. Selects a **smaller inner-window size** (the
-  printed photo size it can display) from the configured passpartout size list.
-  See Frames → Frame geometry & sizing.
+- **Passpartout (mat)** — optional, and only available on a **standard-size**
+  frame. The dropdown contains, in order: **None**; every default
+  smaller-standard-size inner window (e.g. an A3 frame offers A4, A5, A6); any
+  **custom-size passpartouts already in use on the wall under a frame of the
+  same standard size** (so a custom inner window entered once on one A3 frame
+  is reusable on any other A3 frame); and a **Custom…** entry. Picking
+  Custom… reveals two cm inputs for the inner window's width and height; the
+  resulting passpartout is identified by its dimensions, so identical custom
+  inner windows on different frames coalesce to a single dropdown entry.
 - **Color** — frame color, chosen from the defaults (black, brown, red-brown,
   gold, silver) or **custom**. See Frames → Frame color. Editable across a
   multi-selection.

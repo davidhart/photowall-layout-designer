@@ -1,4 +1,5 @@
 import { effectivePrintSize } from "../model/geometry";
+import { standardSizes } from "../model/standards";
 import type { Project } from "../model/types";
 
 /** A photo to print, at a given effective print size, with a quantity. */
@@ -44,9 +45,7 @@ function round1(n: number): number {
  */
 export function buildBillOfMaterials(project: Project): BillOfMaterials {
   const photosById = new Map(project.photos.map((p) => [p.id, p]));
-  const sizeNameById = new Map(
-    project.wall.standardSizes.map((s) => [s.id, s.name]),
-  );
+  const sizeNameById = new Map(standardSizes().map((s) => [s.id, s.name]));
 
   const prints = new Map<string, PrintItem>();
   const frames = new Map<string, FrameItem>();

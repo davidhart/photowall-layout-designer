@@ -105,34 +105,10 @@ function parseColor(v: unknown): FrameColor | null {
 function parseWall(v: unknown): WallSettings {
   const fallback = defaultWallSettings();
   if (!isObj(v)) return fallback;
-  const sizes = Array.isArray(v.standardSizes)
-    ? v.standardSizes
-        .filter(isObj)
-        .map((s) => ({
-          id: str(s.id, ""),
-          name: str(s.name, ""),
-          width: num(s.width, 0),
-          height: num(s.height, 0),
-        }))
-    : fallback.standardSizes;
-  const ppRaw = isObj(v.passpartoutOptions) ? v.passpartoutOptions : {};
-  const passpartoutOptions: Record<string, PasspartoutSize[]> = {};
-  for (const [key, list] of Object.entries(ppRaw)) {
-    if (Array.isArray(list)) {
-      passpartoutOptions[key] = list
-        .map(parsePasspartout)
-        .filter((p): p is PasspartoutSize => p !== null);
-    }
-  }
   return {
     width: num(v.width, fallback.width),
     height: num(v.height, fallback.height),
     color: str(v.color, fallback.color),
-    standardSizes: sizes,
-    passpartoutOptions:
-      Object.keys(passpartoutOptions).length > 0
-        ? passpartoutOptions
-        : fallback.passpartoutOptions,
   };
 }
 

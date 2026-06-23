@@ -111,7 +111,14 @@ export interface Frame {
   photoId: string | null;
 }
 
-/** Wall + project configuration (the Project tab edits this). */
+/**
+ * Wall + project configuration (the Project tab edits this).
+ *
+ * The list of standard frame sizes and the default passpartout options per
+ * size are **not** stored here — they're hardcoded app constants (see
+ * `model/standards.ts`). Per-frame customization happens through the Custom…
+ * controls in the Frame Properties panel.
+ */
 export interface WallSettings {
   /** wall width in cm */
   width: number;
@@ -119,10 +126,6 @@ export interface WallSettings {
   height: number;
   /** wall background color (free color, CSS hex) */
   color: string;
-  /** standard frame sizes offered in the Frames tab + properties dropdown */
-  standardSizes: StandardSize[];
-  /** passpartout inner-window options, keyed by standard size id */
-  passpartoutOptions: Record<string, PasspartoutSize[]>;
 }
 
 /** A complete project. This is what gets serialized to JSON / localStorage. */

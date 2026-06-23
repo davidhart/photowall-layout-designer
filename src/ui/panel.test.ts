@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from "vitest";
+import { standardSizes } from "../model/standards";
 import { addFrame } from "../state/commands";
 import { Store } from "../state/store";
 import type { Frame } from "../model/types";
@@ -37,7 +38,7 @@ describe("LeftPanel — Frames palette", () => {
       '[data-tab-panel="frames"] .palette-item',
     );
     // Default project ships ISO A0..A6 (7 sizes) + generic Custom.
-    expect(items.length).toBe(store.getProject().wall.standardSizes.length + 1);
+    expect(items.length).toBe(standardSizes().length + 1);
   });
 
   it("surfaces each distinct custom aperture on the wall as its own template", () => {
