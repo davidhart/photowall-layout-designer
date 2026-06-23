@@ -262,7 +262,14 @@ export function buildWallSvg(
   );
   // Grid overlay (clipped to the wall area).
   svg.appendChild(
-    svgEl("rect", { x: 0, y: 0, width, height, fill: "url(#wall-grid)" }),
+    svgEl("rect", {
+      x: 0,
+      y: 0,
+      width,
+      height,
+      fill: "url(#wall-grid)",
+      class: "wall-grid",
+    }),
   );
 
   const photosById = new Map(project.photos.map((p) => [p.id, p]));
