@@ -35,8 +35,8 @@ describe("renderFrame", () => {
     expect(g.getAttribute("data-frame-id")).toBe("f1");
     expect(g.querySelector("image")).toBeNull();
     const rects = g.querySelectorAll("rect");
-    // outer moulding + white photo backing
-    expect(rects.length).toBe(2);
+    // outer moulding + white photo backing + (hidden) selection rect
+    expect(rects.length).toBe(3);
   });
 
   it("positions the group at the outer-AABB center", () => {
@@ -61,13 +61,22 @@ describe("renderFrame", () => {
       null,
       false,
     );
-    // outer + mat (aperture) + white inner-window backing
-    expect(g.querySelectorAll("rect").length).toBe(3);
+    // outer + mat (aperture) + white inner-window backing + (hidden) selection
+    expect(g.querySelectorAll("rect").length).toBe(4);
   });
 
-  it("adds a selection highlight when selected", () => {
-    const g = renderFrame(frame(), null, true);
-    expect(g.querySelector(".frame__selection")).not.toBeNull();
+  it("always renders a selection rect, hidden when not selected", () => {
+    const unselected = renderFrame(frame(), null, false);
+    const unselectedRect =
+      unselected.querySelector<SVGRectElement>(".frame__selection");
+    expect(unselectedRect).not.toBeNull();
+    expect(unselectedRect?.getAttribute("display")).toBe("none");
+
+    const selected = renderFrame(frame(), null, true);
+    const selectedRect =
+      selected.querySelector<SVGRectElement>(".frame__selection");
+    expect(selectedRect).not.toBeNull();
+    expect(selectedRect?.getAttribute("display")).toBeNull();
   });
 
   it("rotates 90° via the group transform", () => {
@@ -85,7 +94,14 @@ describe("buildWallSvg", () => {
     expect(svg.tagName.toLowerCase()).toBe("svg");
     expect(svg.querySelector(".wall-bg")?.getAttribute("fill")).toBe("#ffffff");
     expect(svg.querySelectorAll(".frame").length).toBe(2);
-    expect(svg.querySelectorAll(".frame__selection").length).toBe(1);
+    // One selection rect per frame (always present); only the selected one is
+    // visible (no `display="none"`).
+    const selectionRects = svg.querySelectorAll<SVGRectElement>(".frame__selection");
+    expect(selectionRects.length).toBe(2);
+    const visible = Array.from(selectionRects).filter(
+      (r) => r.getAttribute("display") !== "none",
+    );
+    expect(visible.length).toBe(1);
   });
 
   it("sets a cm-based viewBox", () => {

@@ -68,7 +68,7 @@ describe("edge cases", () => {
       false,
     );
     expect(g.getAttribute("transform")).toContain("rotate(90)");
-    // outer + mat + white inner-window backing
-    expect(g.querySelectorAll("rect").length).toBe(3);
+    // outer + mat + white inner-window backing + (hidden) selection rect
+    expect(g.querySelectorAll("rect").length).toBe(4);
   });
 });

@@ -127,24 +127,41 @@ export function renderFrame(
   }
 
   // Selection highlight (constant on-screen width regardless of zoom).
-  if (selected) {
-    g.appendChild(
-      svgEl("rect", {
-        x: -uw / 2,
-        y: -uh / 2,
-        width: uw,
-        height: uh,
-        fill: "none",
-        stroke: SELECT_COLOR,
-        "stroke-width": 2,
-        "stroke-dasharray": "6 4",
-        "vector-effect": "non-scaling-stroke",
-        class: "frame__selection",
-      }),
-    );
-  }
+  //
+  // Always appended — visibility is toggled via the `display` attribute. The
+  // renderer flips this in place on selection change, so changing selection
+  // doesn't rebuild the SVG (and doesn't re-decode every <image>).
+  g.appendChild(
+    svgEl("rect", {
+      x: -uw / 2,
+      y: -uh / 2,
+      width: uw,
+      height: uh,
+      fill: "none",
+      stroke: SELECT_COLOR,
+      "stroke-width": 2,
+      "stroke-dasharray": "6 4",
+      "vector-effect": "non-scaling-stroke",
+      class: "frame__selection",
+      ...(selected ? {} : { display: "none" }),
+    }),
+  );
 
   return g;
+}
+
+/**
+ * Toggles the selection highlight on a frame group in place. Used by the
+ * renderer to update selection without rebuilding the SVG.
+ */
+export function setFrameGroupSelected(
+  group: SVGGElement,
+  selected: boolean,
+): void {
+  const rect = group.querySelector<SVGRectElement>(".frame__selection");
+  if (!rect) return;
+  if (selected) rect.removeAttribute("display");
+  else rect.setAttribute("display", "none");
 }
 
 /** Builds the grid pattern definition (lines every GRID_STEP cm). */

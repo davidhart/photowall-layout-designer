@@ -189,3 +189,11 @@ completed.
   and **auto-saved**.
 - Keep all spatial math in **cm**; only convert to px at the SVG/viewBox edge.
 - Frames are axis-aligned (90° rotation) → AABB math everywhere.
+
+
+## PostScript - Bugs and other improvements
+
+- [ ] When printing the BOM print file, document printer inserts a blank page between page 1 and 2. Investigate why and fix.
+- [ ] Add a small < button on the left panel, which collapses it to a > button (which expands it again)
+- [ ] When the frame is empty, render text in the center of it, in large font the name of the size (eg. A4) in smaller font the dimensions in cm (eg. 21.7x32cm).
+- [ ] In the project tab, below wall, we will have an Examples section, here will be a two column view of built in default designed layouts. These will come the examples/ folder of previously saved projects. Pressing any one of these will immediately change the layout - unless the user has made some changes of any kind to the layout, in which case a yes / no confirmation prompt will be needed before destroying their previous layout. From the saved projects we will only import the frames themselves - not override wall color / width / height. The imported frames will be centered as a group. The examples buttons will be small thumbnails of the frames only (no images etc).
