@@ -55,7 +55,11 @@ describe("buildBillOfMaterials", () => {
     const bom = buildBillOfMaterials(p);
     expect(bom.prints).toHaveLength(1);
     expect(bom.prints[0]?.quantity).toBe(2);
-    expect(bom.prints[0]).toMatchObject({ width: 21, height: 29.7 });
+    expect(bom.prints[0]).toMatchObject({
+      width: 21,
+      height: 29.7,
+      sizeName: "A4",
+    });
   });
 
   it("uses passpartout inner window as the print size and counts passpartouts", () => {
@@ -68,8 +72,36 @@ describe("buildBillOfMaterials", () => {
       }),
     );
     const bom = buildBillOfMaterials(p);
-    expect(bom.prints[0]).toMatchObject({ width: 14.8, height: 21 });
+    expect(bom.prints[0]).toMatchObject({
+      width: 14.8,
+      height: 21,
+      sizeName: "A5",
+    });
     expect(bom.passpartouts[0]).toMatchObject({ label: "A5", quantity: 1 });
+  });
+
+  it("leaves sizeName null for custom-aperture and custom-passpartout prints", () => {
+    const p = defaultProject();
+    p.photos.push(photo("p1"), photo("p2"));
+    p.frames.push(
+      frame("a", {
+        photoId: "p1",
+        standardSizeId: null,
+        aperture: { width: 25, height: 35 },
+      }),
+      frame("b", {
+        photoId: "p2",
+        passpartout: {
+          id: "custom:14.8x21",
+          name: "14.8×21",
+          width: 14.8,
+          height: 21,
+        },
+      }),
+    );
+    const bom = buildBillOfMaterials(p);
+    expect(bom.prints.find((x) => x.photoId === "p1")?.sizeName).toBeNull();
+    expect(bom.prints.find((x) => x.photoId === "p2")?.sizeName).toBeNull();
   });
 
   it("ignores empty frames for the print list", () => {

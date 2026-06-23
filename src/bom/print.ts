@@ -46,7 +46,9 @@ function buildMaterialsPage(bom: BillOfMaterials): HTMLElement {
   const printRows = bom.prints.map((p) => [
     h("img", { class: "bom-thumb", src: p.thumbnailDataUrl, alt: p.name }),
     p.name,
-    `${fmt(p.width)} × ${fmt(p.height)} cm`,
+    p.sizeName
+      ? `${p.sizeName} (${fmt(p.width)} × ${fmt(p.height)} cm)`
+      : `${fmt(p.width)} × ${fmt(p.height)} cm`,
     String(p.quantity),
   ]);
   const frameRows = bom.frames.map((f) => [

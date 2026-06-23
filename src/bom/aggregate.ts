@@ -1,12 +1,18 @@
 import { effectivePrintSize } from "../model/geometry";
 import { standardSizes } from "../model/standards";
-import type { Project } from "../model/types";
+import type { Frame, Project } from "../model/types";
 
 /** A photo to print, at a given effective print size, with a quantity. */
 export interface PrintItem {
   photoId: string;
   name: string;
   thumbnailDataUrl: string;
+  /**
+   * Standard size name for the print (e.g. `A4`) when it maps to one;
+   * `null` for custom-size prints (custom-aperture frames or custom
+   * passpartouts), where only the dimensions identify the print.
+   */
+  sizeName: string | null;
   width: number;
   height: number;
   quantity: number;
@@ -86,6 +92,7 @@ export function buildBillOfMaterials(project: Project): BillOfMaterials {
         const print = effectivePrintSize(frame);
         const w = round1(print.width);
         const h = round1(print.height);
+        const sizeName = printSizeName(frame, sizeNameById);
         const printKey = `${photo.id}|${w}x${h}`;
         const existing = prints.get(printKey);
         if (existing) existing.quantity += 1;
@@ -94,6 +101,7 @@ export function buildBillOfMaterials(project: Project): BillOfMaterials {
             photoId: photo.id,
             name: photo.name,
             thumbnailDataUrl: photo.thumbnailDataUrl || photo.dataUrl,
+            sizeName,
             width: w,
             height: h,
             quantity: 1,
@@ -107,4 +115,25 @@ export function buildBillOfMaterials(project: Project): BillOfMaterials {
     frames: [...frames.values()],
     passpartouts: [...passpartouts.values()],
   };
+}
+
+/**
+ * The standard-size name for a frame's *effective print size*: the
+ * passpartout's name when one is set (unless it's a custom-dimension mat —
+ * id prefixed `custom:`), otherwise the frame's standard size name. Returns
+ * `null` when the print has no standard-size mapping (custom-aperture frame
+ * with no passpartout, or custom passpartout on any frame).
+ */
+function printSizeName(
+  frame: Frame,
+  sizeNameById: Map<string, string>,
+): string | null {
+  if (frame.passpartout) {
+    if (frame.passpartout.id.startsWith("custom:")) return null;
+    return frame.passpartout.name;
+  }
+  if (frame.standardSizeId) {
+    return sizeNameById.get(frame.standardSizeId) ?? null;
+  }
+  return null;
 }
