@@ -142,10 +142,15 @@ export class ViewportControls {
   private buildZoomButtons(): void {
     const controls = document.createElement("div");
     controls.className = "zoom-controls";
-    const make = (label: string, onClick: () => void): HTMLButtonElement => {
+    const make = (
+      label: string,
+      title: string,
+      onClick: () => void,
+    ): HTMLButtonElement => {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.textContent = label;
+      btn.title = title;
       btn.addEventListener("click", onClick);
       controls.appendChild(btn);
       return btn;
@@ -154,12 +159,13 @@ export class ViewportControls {
       const { w, h } = this.size();
       return { x: w / 2, y: h / 2 };
     };
-    make("−", () => {
+    make("−", "Zoom out", () => {
       const c = center();
       this.zoomByFactor(1 / BUTTON_ZOOM_STEP, c.x, c.y);
     });
-    make("Fit", () => this.fit());
-    make("+", () => {
+    // U+26F6 SQUARE FOUR CORNERS — the conventional fit-to-screen glyph.
+    make("⛶", "Fit to view", () => this.fit());
+    make("+", "Zoom in", () => {
       const c = center();
       this.zoomByFactor(BUTTON_ZOOM_STEP, c.x, c.y);
     });

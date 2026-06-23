@@ -39,17 +39,18 @@ never uploads anything to a server. It ships as a **single static HTML file**.
 
 ---
 
-## Top Toolbar
+## Project Actions
 
-A toolbar across the top of the window provides project-level actions:
+There is no separate top toolbar. Project-level actions live at the top of the
+**Project tab** in the left panel:
 
 - **New** — start a fresh, empty project.
+- **Open** — read a project back from a **JSON** file.
 - **Save** — write the project out as a **JSON** file (download).
-- **Load** — read a project back from a **JSON** file.
-- **Generate Bill of Materials** — produce a shopping/printing report for the
-  current layout (see Bill of Materials).
+- **Generate BOM** — produce a shopping/printing report for the current layout
+  (see Bill of Materials).
 
-In addition to explicit Save/Load, the current layout is **auto-persisted to
+In addition to explicit Save / Open, the current layout is **auto-persisted to
 `localStorage`** so reopening the tool restores the last project.
 
 ---
@@ -98,12 +99,19 @@ tabs**:
 
 ### 1. Project Tab
 
-- Configure the **wall / canvas dimensions** (real-world size, in cm). Default
-  wall size: **200 × 150 cm**.
-- (These dimensions drive the to-scale rendering of everything on the wall.)
-- Configure the **wall color** (background of the wall). Default **white**. This
-  uses a plain **free color picker** — it does **not** use the frame custom-color
-  palette logic (no saved swatches list).
+Top of the tab: the **Project Actions** (see above) — `New / Open / Save` on
+one row, `Generate BOM` on the next.
+
+Below that, a **Wall** section with three fields laid out on a single row
+(labels above):
+
+- **Color** — wall background color. Default **white**. This uses a plain
+  **free color picker** — it does **not** use the frame custom-color palette
+  logic (no saved swatches list).
+- **Width (cm)** — wall width. Default **200**.
+- **Height (cm)** — wall height. Default **150**.
+
+(These dimensions drive the to-scale rendering of everything on the wall.)
 
 The set of **standard frame sizes** (ISO A-series A0–A6) and the **default
 passpartout options per size** (every smaller standard size — e.g. A3 offers
@@ -280,8 +288,8 @@ Properties:
 
 ## Bill of Materials
 
-The **Generate Bill of Materials** toolbar action produces a report for the
-current layout to support actually buying and printing everything.
+The **Generate BOM** action (Project tab) produces a report for the current
+layout to support actually buying and printing everything.
 
 The report is generated as a **print-styled HTML view** and output via the
 **browser's native print / save-as-PDF** dialog (no PDF library; keeps the
@@ -341,19 +349,20 @@ wall).
 There are two distinct persistence paths, which deliberately store **different
 amounts of data**:
 
-- **Auto-save to `localStorage`** — stores **layout only**: the wall settings,
-  the standard-size / passpartout configuration, and every frame (position,
-  size, thickness, color, rotation, passpartout). It does **not** store any
-  image data — image data URLs are large and would quickly exceed the
-  `localStorage` quota. On reopen, the layout is restored, but **frames that
-  held a photo come back as empty placeholders** (the pictures are not kept in
-  the browser). To keep the actual photos, use **Save**.
-- **Save / Load** (toolbar) — serialize the project to / from a **JSON** file.
-  This is the portable, complete backup: it **embeds image data** (base64 /
-  data URLs) so a saved project survives reload and JSON round-trips and can be
-  opened on another machine. (The browser cannot persist photos by filesystem
-  path, so embedding is the only way for the file to be self-contained.)
-- **New** (toolbar) clears the project to start fresh.
+- **Auto-save to `localStorage`** — stores **layout only**: the wall settings
+  and every frame (position, size, thickness, color, rotation, passpartout).
+  It does **not** store any image data — image data URLs are large and would
+  quickly exceed the `localStorage` quota. On reopen, the layout is restored,
+  but **frames that held a photo come back as empty placeholders** (the
+  pictures are not kept in the browser). To keep the actual photos, use
+  **Save**.
+- **Save / Open** (Project tab) — serialize the project to / from a **JSON**
+  file. This is the portable, complete backup: it **embeds image data**
+  (base64 / data URLs) so a saved project survives reload and JSON round-trips
+  and can be opened on another machine. (The browser cannot persist photos by
+  filesystem path, so embedding is the only way for the file to be
+  self-contained.)
+- **New** (Project tab) clears the project to start fresh.
 
 Note: loading a JSON file restores the embedded photos for the session, but the
 next `localStorage` auto-save still stores layout-only — reopening later

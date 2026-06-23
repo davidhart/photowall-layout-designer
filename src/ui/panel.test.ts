@@ -11,6 +11,13 @@ const PANELS = `
   <section data-tab-panel="frames"></section>
 `;
 
+const NOOP_ACTIONS = {
+  onNew: () => {},
+  onOpen: () => {},
+  onSave: () => {},
+  onGenerateBom: () => {},
+};
+
 function customFrame(id: string, width: number, height: number): Frame {
   return {
     id,
@@ -33,7 +40,7 @@ describe("LeftPanel — Frames palette", () => {
 
   it("renders one palette item per standard size plus a generic Custom template", () => {
     const store = new Store();
-    new LeftPanel(store);
+    new LeftPanel(store, NOOP_ACTIONS);
     const items = document.querySelectorAll(
       '[data-tab-panel="frames"] .palette-item',
     );
@@ -43,7 +50,7 @@ describe("LeftPanel — Frames palette", () => {
 
   it("surfaces each distinct custom aperture on the wall as its own template", () => {
     const store = new Store();
-    new LeftPanel(store);
+    new LeftPanel(store, NOOP_ACTIONS);
     const beforeCount = document.querySelectorAll(
       '[data-tab-panel="frames"] .palette-item',
     ).length;

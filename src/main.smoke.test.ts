@@ -6,14 +6,6 @@ import type { Frame } from "./model/types";
 
 const BODY = `
   <div id="app">
-    <header id="toolbar" class="toolbar">
-      <div class="toolbar__actions">
-        <button data-action="new">New</button>
-        <button data-action="save">Save</button>
-        <button data-action="load">Load</button>
-        <button data-action="bom">BOM</button>
-      </div>
-    </header>
     <main id="wall-view" class="wall-view"></main>
     <aside id="left-panel" class="left-panel">
       <nav class="left-panel__tabs">
@@ -85,6 +77,12 @@ describe("app boot (integration smoke)", () => {
     // Project panel rendered some inputs.
     const settings = document.querySelector('[data-tab-panel="project"]');
     expect(settings?.querySelectorAll("input").length).toBeGreaterThan(0);
+
+    // Project actions rendered in the panel (no top toolbar anymore).
+    const actionLabels = Array.from(
+      settings?.querySelectorAll(".project-actions button") ?? [],
+    ).map((b) => b.textContent);
+    expect(actionLabels).toEqual(["New", "Open", "Save", "Generate BOM"]);
 
     // Frames palette rendered.
     expect(

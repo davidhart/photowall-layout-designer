@@ -5,6 +5,13 @@ import type { Store } from "../state/store";
 import { DND_FRAME_SIZE, encodeCustomFrameSizeId } from "./dnd";
 import { h } from "./dom";
 
+export interface ProjectActions {
+  onNew: () => void;
+  onOpen: () => void;
+  onSave: () => void;
+  onGenerateBom: () => void;
+}
+
 /**
  * Renders the left panel's two tabs (Project / Frames) from store state.
  * Rebuilds only when the project reference changes, so view-only updates
@@ -15,7 +22,10 @@ export class LeftPanel {
   private framesEl: HTMLElement;
   private lastProject: unknown = null;
 
-  constructor(private readonly store: Store) {
+  constructor(
+    private readonly store: Store,
+    private readonly actions: ProjectActions,
+  ) {
     this.projectEl = this.panel("project");
     this.framesEl = this.panel("frames");
     this.store.subscribe(() => this.render());
@@ -41,6 +51,9 @@ export class LeftPanel {
   private renderProject(): void {
     const wall = this.store.getProject().wall;
 
+    const actionButton = (label: string, onClick: () => void) =>
+      h("button", { type: "button", text: label, onclick: onClick });
+
     const dimInput = (label: string, value: number, key: "width" | "height") =>
       h("label", { class: "field" }, [
         h("span", { text: label }),
@@ -56,8 +69,8 @@ export class LeftPanel {
         }),
       ]);
 
-    const wallColor = h("label", { class: "field" }, [
-      h("span", { text: "Wall color" }),
+    const colorField = h("label", { class: "field" }, [
+      h("span", { text: "Color" }),
       h("input", {
         type: "color",
         value: wall.color,
@@ -69,12 +82,20 @@ export class LeftPanel {
     ]);
 
     this.projectEl.replaceChildren(
+      h("div", { class: "project-actions" }, [
+        h("div", { class: "project-actions__row" }, [
+          actionButton("New", this.actions.onNew),
+          actionButton("Open", this.actions.onOpen),
+          actionButton("Save", this.actions.onSave),
+        ]),
+        actionButton("Generate BOM", this.actions.onGenerateBom),
+      ]),
       h("h3", { text: "Wall" }),
       h("div", { class: "field-row" }, [
+        colorField,
         dimInput("Width (cm)", wall.width, "width"),
         dimInput("Height (cm)", wall.height, "height"),
       ]),
-      wallColor,
     );
   }
 
