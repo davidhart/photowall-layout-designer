@@ -95,7 +95,8 @@ neither is constrained.
 ## Left Floating Panel — Project
 
 A floating panel docked on the left contains the project, organized into **two
-tabs**:
+tabs**. A small chevron button at the top-right corner of the panel **collapses**
+it to a single button (and expands it again on click).
 
 ### 1. Project Tab
 
@@ -118,6 +119,17 @@ passpartout options per size** (every smaller standard size — e.g. A3 offers
 A4, A5, A6) are **hardcoded in app code** rather than configured here.
 Per-frame customization is done by picking **Custom…** in the Frame Properties
 panel (custom frame aperture, custom passpartout inner window).
+
+Below the Wall fields, an **Examples** section shows a two-column grid of
+built-in layouts. The bundled examples come from `.json` files in the project's
+`/examples/` directory (auto-discovered at build time via Vite); dropping a
+new saved-project JSON file into that folder makes it appear here. Each
+example is rendered as a frame-only thumbnail (no images, no grid). Clicking
+an example replaces the current frames with the example's frames, **centered
+as a group** on the current wall; the **wall settings are preserved** (size,
+color), and the example's photos are not imported. If the user has made any
+changes to the current layout (i.e. there is at least one entry in the undo
+stack), the action is gated behind a confirmation dialog.
 
 ### 2. Frames Tab
 
@@ -191,6 +203,11 @@ placeholder) or **contain a photo**.
 - An empty (photo-less) placeholder frame renders as a normal frame (moulding in
   its selected color) with a plain **white rectangle** filling the center where
   the photo would go.
+- The white center is labelled with the frame's **standard size name** (e.g.
+  `A4`) in larger text and the **aperture dimensions** (e.g. `21 × 29.7 cm`) in
+  smaller text below it. Custom-size frames omit the name line and show the
+  dimensions only. The label is counter-rotated so it always reads upright,
+  even when the frame itself is rotated 90°/180°/270°.
 
 ### Filling / replacing photos in a frame
 

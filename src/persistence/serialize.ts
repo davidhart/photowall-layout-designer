@@ -22,11 +22,13 @@ export interface SerializeOptions {
 }
 
 /**
- * Serializes a project to JSON. With `embedImages` (default) it embeds photo
- * data URLs and only the custom colors used by frames. Without it, the `photos`
- * array is dropped and every frame's `photoId` is cleared, so only frames + the
- * wall/layout configuration are stored (frames that held a photo restore as
- * empty placeholders).
+ * Serializes a project to JSON. With `embedImages` (default) it embeds **only
+ * the photos actually referenced by a frame** (orphaned photos in
+ * `project.photos` are dropped), plus only the custom colors used by frames.
+ * Without `embedImages`, the `photos` array is dropped entirely and every
+ * frame's `photoId` is cleared, so only frames + the wall/layout
+ * configuration are stored (frames that held a photo restore as empty
+ * placeholders).
  */
 export function serializeProject(
   project: Project,
@@ -35,7 +37,13 @@ export function serializeProject(
   const { embedImages = true } = options;
   const usedHexes = new Set(project.frames.map((f) => f.color));
   const customColors = project.customColors.filter((c) => usedHexes.has(c.hex));
-  const photos = embedImages ? project.photos : [];
+  const usedPhotoIds = new Set<string>();
+  for (const f of project.frames) {
+    if (f.photoId) usedPhotoIds.add(f.photoId);
+  }
+  const photos = embedImages
+    ? project.photos.filter((p) => usedPhotoIds.has(p.id))
+    : [];
   const frames = embedImages
     ? project.frames
     : project.frames.map((f) => ({ ...f, photoId: null }));

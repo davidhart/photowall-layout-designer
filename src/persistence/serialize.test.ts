@@ -26,7 +26,7 @@ function frame(id: string, overrides: Partial<Frame> = {}): Frame {
 describe("serialize / deserialize round-trip", () => {
   it("preserves wall, frames, and photos", () => {
     const p = defaultProject();
-    p.frames.push(frame("f1", { rotation: 90 }));
+    p.frames.push(frame("f1", { rotation: 90, photoId: "p1" }));
     p.photos.push({
       id: "p1",
       name: "p.jpg",
@@ -61,6 +61,37 @@ describe("serialize / deserialize round-trip", () => {
     // layout is preserved
     expect(back.frames[0]?.aperture).toEqual({ width: 21, height: 29.7 });
     expect(back.wall.width).toBe(p.wall.width);
+  });
+
+  it("drops photos that no frame references (orphans)", () => {
+    const p = defaultProject();
+    // Two photos, only p1 is in use.
+    p.photos.push(
+      {
+        id: "p1",
+        name: "used.jpg",
+        dataUrl: "data:image/png;base64,USED",
+        thumbnailDataUrl: "data:image/png;base64,U",
+        pixelWidth: 100,
+        pixelHeight: 200,
+      },
+      {
+        id: "p2",
+        name: "orphan.jpg",
+        dataUrl: "data:image/png;base64,ORPHAN",
+        thumbnailDataUrl: "data:image/png;base64,O",
+        pixelWidth: 100,
+        pixelHeight: 200,
+      },
+    );
+    p.frames.push(frame("f1", { photoId: "p1" }));
+
+    const json = serializeProject(p);
+    expect(json).toContain("USED");
+    expect(json).not.toContain("ORPHAN");
+
+    const back = deserializeProject(json);
+    expect(back.photos.map((x) => x.id)).toEqual(["p1"]);
   });
 
   it("embeds only custom colors used by frames", () => {

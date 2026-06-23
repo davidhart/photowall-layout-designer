@@ -27,8 +27,21 @@ export class ViewportControls {
     private readonly store: Store,
   ) {
     this.attach();
+    // Refit whenever the store emits with a null viewBox — this is how
+    // `store.replaceProject` (New / Open / Load Example) signals "you've got
+    // a fresh project, please refit me." Without this, the viewBox stays
+    // null after a project swap and every gesture that needs px↔cm (drag a
+    // frame, drop a photo, drop an empty frame) silently bails out.
+    this.store.subscribe(() => this.maybeRefit());
     // Defer initial fit until layout has a size.
     requestAnimationFrame(() => this.fit());
+  }
+
+  private maybeRefit(): void {
+    if (this.store.getUI().viewBox !== null) return;
+    const { w, h } = this.size();
+    if (w <= 0 || h <= 0) return;
+    this.fit();
   }
 
   private size(): { w: number; h: number; rect: DOMRect } {

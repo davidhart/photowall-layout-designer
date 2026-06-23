@@ -4,12 +4,19 @@ import { updateWall } from "../state/commands";
 import type { Store } from "../state/store";
 import { DND_FRAME_SIZE, encodeCustomFrameSizeId } from "./dnd";
 import { h } from "./dom";
+import {
+  type Example,
+  loadBundledExamples,
+  renderExampleThumbnail,
+} from "./examples";
 
 export interface ProjectActions {
   onNew: () => void;
   onOpen: () => void;
   onSave: () => void;
   onGenerateBom: () => void;
+  /** Load the given example layout into the current project. */
+  onLoadExample: (example: Example) => void;
 }
 
 /**
@@ -21,6 +28,8 @@ export class LeftPanel {
   private projectEl: HTMLElement;
   private framesEl: HTMLElement;
   private lastProject: unknown = null;
+  /** Static — bundled at build time, doesn't change across renders. */
+  private readonly examples: Example[];
 
   constructor(
     private readonly store: Store,
@@ -28,6 +37,7 @@ export class LeftPanel {
   ) {
     this.projectEl = this.panel("project");
     this.framesEl = this.panel("frames");
+    this.examples = loadBundledExamples();
     this.store.subscribe(() => this.render());
     this.render();
   }
@@ -81,7 +91,7 @@ export class LeftPanel {
       }),
     ]);
 
-    this.projectEl.replaceChildren(
+    const children: Node[] = [
       h("div", { class: "project-actions" }, [
         h("div", { class: "project-actions__row" }, [
           actionButton("New", this.actions.onNew),
@@ -96,7 +106,28 @@ export class LeftPanel {
         dimInput("Width (cm)", wall.width, "width"),
         dimInput("Height (cm)", wall.height, "height"),
       ]),
+    ];
+    if (this.examples.length > 0) {
+      children.push(h("h3", { text: "Examples" }), this.renderExamplesGrid());
+    }
+    this.projectEl.replaceChildren(...children);
+  }
+
+  private renderExamplesGrid(): HTMLElement {
+    const items = this.examples.map((example) =>
+      h(
+        "button",
+        {
+          type: "button",
+          class: "example-thumb",
+          // Title is the only place the example's name surfaces (hover).
+          title: example.name,
+          onclick: () => this.actions.onLoadExample(example),
+        },
+        [renderExampleThumbnail(example)],
+      ),
     );
+    return h("div", { class: "examples-grid" }, items);
   }
 
   // ---- Frames tab ----

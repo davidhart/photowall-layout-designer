@@ -8,6 +8,7 @@ import {
   loadProjectFromStorage,
 } from "./persistence/storage";
 import { Store } from "./state/store";
+import { type Example, importExampleFrames } from "./ui/examples";
 import { LeftPanel } from "./ui/panel";
 import {
   mergeProjectColorsIntoPalette,
@@ -37,6 +38,19 @@ function initTabs(): void {
   }
 }
 
+/** Wires the left-panel collapse/expand chevron. */
+function initPanelCollapse(): void {
+  const panel = document.getElementById("left-panel");
+  const toggle = document.getElementById("left-panel-toggle");
+  if (!panel || !toggle) return;
+  toggle.addEventListener("click", () => {
+    const collapsed = panel.classList.toggle("left-panel--collapsed");
+    toggle.textContent = collapsed ? "›" : "‹";
+    toggle.setAttribute("aria-expanded", String(!collapsed));
+    toggle.title = collapsed ? "Expand panel" : "Collapse panel";
+  });
+}
+
 function boot(): void {
   const wallContainer = document.getElementById("wall-view");
   if (!wallContainer) throw new Error("#wall-view not found");
@@ -54,6 +68,30 @@ function boot(): void {
     if (errors.length) alert(errors.join("\n"));
   };
 
+  const loadExample = (example: Example): void => {
+    // Only prompt if the user has actually changed something since the last
+    // reset (canUndo === at least one dispatched command on the history).
+    if (store.canUndo()) {
+      const ok = confirm(
+        "Load this example? It will replace the current layout.",
+      );
+      if (!ok) return;
+    }
+    const current = store.getProject();
+    // Keep current wall + custom-color palette; replace the frame set with
+    // the centered, freshly-id'd example frames. Goes through replaceProject
+    // so the whole load is a single (un-undoable) state swap — consistent
+    // with New / Open, and so a subsequent example load doesn't prompt.
+    const frames = importExampleFrames(example, current.wall.width, current.wall.height);
+    store.replaceProject({
+      version: current.version,
+      wall: current.wall,
+      photos: [],
+      frames,
+      customColors: current.customColors,
+    });
+  };
+
   new ViewportControls(wallContainer, store);
   new InteractionController(wallContainer, store);
   new LeftPanel(store, {
@@ -61,6 +99,7 @@ function boot(): void {
     onOpen: () => openProject(store, (m) => alert(m)),
     onSave: () => saveProject(store),
     onGenerateBom: () => generateBillOfMaterials(store.getProject()),
+    onLoadExample: loadExample,
   });
   new DropController(wallContainer, store, showErrors);
 
@@ -71,6 +110,7 @@ function boot(): void {
 
   bindHistoryShortcuts(store);
   initTabs();
+  initPanelCollapse();
 
   // Expose for ad-hoc debugging during development.
   (window as unknown as { __store?: Store }).__store = store;

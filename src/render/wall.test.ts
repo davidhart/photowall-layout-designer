@@ -79,6 +79,32 @@ describe("renderFrame", () => {
     expect(selectedRect?.getAttribute("display")).toBeNull();
   });
 
+  it("labels an empty standard-size frame with name + aperture dims", () => {
+    const g = renderFrame(frame(), null, false);
+    const name = g.querySelector(".frame__empty-name");
+    const dims = g.querySelector(".frame__empty-dims");
+    expect(name?.textContent).toBe("A4");
+    expect(dims?.textContent).toBe("21 × 29.7 cm");
+  });
+
+  it("omits the name line on a custom-size frame (dims only)", () => {
+    const g = renderFrame(
+      frame({ standardSizeId: null, aperture: { width: 25, height: 35 } }),
+      null,
+      false,
+    );
+    expect(g.querySelector(".frame__empty-name")).toBeNull();
+    expect(g.querySelector(".frame__empty-dims")?.textContent).toBe(
+      "25 × 35 cm",
+    );
+  });
+
+  it("drops the empty-frame label once a photo is placed", () => {
+    const g = renderFrame(frame({ photoId: "p1" }), photo, false);
+    expect(g.querySelector(".frame__empty-name")).toBeNull();
+    expect(g.querySelector(".frame__empty-dims")).toBeNull();
+  });
+
   it("rotates 90° via the group transform", () => {
     const g = renderFrame(frame({ rotation: 90 }), null, false);
     expect(g.getAttribute("transform")).toContain("rotate(90)");

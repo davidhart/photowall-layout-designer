@@ -8,6 +8,7 @@ const BODY = `
   <div id="app">
     <main id="wall-view" class="wall-view"></main>
     <aside id="left-panel" class="left-panel">
+      <button id="left-panel-toggle" class="left-panel__toggle" aria-expanded="true">‹</button>
       <nav class="left-panel__tabs">
         <button role="tab" data-tab="project" aria-selected="true">Project</button>
         <button role="tab" data-tab="frames">Frames</button>
@@ -88,6 +89,24 @@ describe("app boot (integration smoke)", () => {
     expect(
       document.querySelectorAll('[data-tab-panel="frames"] .palette-item').length,
     ).toBeGreaterThan(0);
+
+    // Bundled examples surfaced as a grid in the Project tab.
+    expect(
+      document.querySelectorAll('[data-tab-panel="project"] .example-thumb').length,
+    ).toBeGreaterThan(0);
+  });
+
+  it("toggles the left panel collapsed/expanded via the chevron button", async () => {
+    await import("./main");
+    const panel = document.getElementById("left-panel")!;
+    const toggle = document.getElementById("left-panel-toggle")!;
+    expect(panel.classList.contains("left-panel--collapsed")).toBe(false);
+    toggle.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(panel.classList.contains("left-panel--collapsed")).toBe(true);
+    expect(toggle.textContent).toBe("›");
+    toggle.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(panel.classList.contains("left-panel--collapsed")).toBe(false);
+    expect(toggle.textContent).toBe("‹");
   });
 
   it("re-renders the wall when the store changes", async () => {
@@ -103,5 +122,27 @@ describe("app boot (integration smoke)", () => {
     store.setSelection(["f1"]);
     const panel = document.getElementById("properties-panel");
     expect(panel?.hidden).toBe(false);
+  });
+
+  it("refits the viewBox after replaceProject (so drag/drop don't lock up)", async () => {
+    // Give the wall container a non-zero size so the fit math can run.
+    Object.defineProperty(HTMLElement.prototype, "getBoundingClientRect", {
+      configurable: true,
+      value: () =>
+        ({ width: 800, height: 600, top: 0, left: 0, right: 800, bottom: 600 }) as DOMRect,
+    });
+
+    await import("./main");
+    const store = (window as unknown as { __store: Store }).__store;
+    // Wait for the initial rAF-deferred fit().
+    await new Promise((r) => requestAnimationFrame(() => r(null)));
+    expect(store.getUI().viewBox).not.toBeNull();
+
+    // Simulate Load Example / New / Open — replaceProject nulls the viewBox,
+    // and the listener must refit synchronously so pointer/drop handlers
+    // (which read store.viewBox directly) don't bail out.
+    const fresh = { ...store.getProject(), frames: [] };
+    store.replaceProject(fresh);
+    expect(store.getUI().viewBox).not.toBeNull();
   });
 });

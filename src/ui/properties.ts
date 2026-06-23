@@ -126,14 +126,32 @@ export class PropertiesPanel {
         });
       },
     }) as HTMLInputElement;
-    const label = frame.photoId === null ? "Choose Photo" : "Replace Photo";
-    const button = h("button", {
+    const hasPhoto = frame.photoId !== null;
+    const chooseButton = h("button", {
       type: "button",
-      class: "choose-photo",
-      text: label,
+      class: "photo-btn",
+      text: hasPhoto ? "Replace Photo" : "Choose Photo",
       onclick: () => fileInput.click(),
     });
-    return h("div", { class: "prop-field" }, [button, fileInput]);
+    const children: Node[] = [chooseButton];
+    if (hasPhoto) {
+      children.push(
+        h("button", {
+          type: "button",
+          class: "photo-btn photo-btn--icon",
+          title: "Remove photo",
+          "aria-label": "Remove photo",
+          // U+1F5D1 WASTEBASKET — trash-can icon.
+          text: "🗑",
+          // Clear the photoId only — keep the frame's aperture / orientation
+          // / rotation. The photo itself stays in the project (it may be in
+          // use by other frames).
+          onclick: () =>
+            this.store.dispatch(updateFrames([frame.id], { photoId: null })),
+        }),
+      );
+    }
+    return h("div", { class: "prop-field photo-row" }, [...children, fileInput]);
   }
 
   private sizeControl(frame: Frame): HTMLElement {

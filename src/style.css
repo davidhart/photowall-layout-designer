@@ -87,6 +87,18 @@ button:hover {
   cursor: pointer;
 }
 
+/* Empty-frame size label.
+   - `pointer-events: none` keeps clicks/drags hitting the frame group, not
+     the text (otherwise dragging an empty frame triggers native text
+     selection instead of the move gesture).
+   - `user-select: none` prevents the label from highlighting under a
+     cursor sweep. */
+.frame__empty-label {
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 /* ---- Left floating panel ---- */
 .left-panel {
   position: absolute;
@@ -102,6 +114,47 @@ button:hover {
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
   z-index: 10;
   overflow: hidden;
+}
+
+/* Collapse/expand chevron — top-right corner, overlays the tab strip. */
+.left-panel__toggle {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 1;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  line-height: 22px;
+  text-align: center;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  color: #6a6a72;
+  font-size: 18px;
+  cursor: pointer;
+}
+.left-panel__toggle:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--text);
+  border: none;
+}
+
+.left-panel--collapsed {
+  width: auto;
+  max-height: none;
+  padding: 0;
+}
+.left-panel--collapsed .left-panel__tabs,
+.left-panel--collapsed .left-panel__body {
+  display: none;
+}
+.left-panel--collapsed .left-panel__toggle {
+  position: static;
+  width: 32px;
+  height: 32px;
+  line-height: 30px;
+  font-size: 20px;
 }
 
 .left-panel__tabs {
@@ -280,6 +333,30 @@ input[type="color"] {
   gap: 10px;
   margin-top: 6px;
 }
+
+/* ---- Examples grid (Project tab) ---- */
+.examples-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 6px;
+}
+.example-thumb {
+  display: block;
+  padding: 4px;
+  background: #fff;
+  border: 1px solid var(--surface-border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.example-thumb:hover {
+  border-color: var(--accent);
+}
+.example-thumb__svg {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+}
 .palette-item {
   display: flex;
   flex-direction: column;
@@ -380,8 +457,16 @@ input[type="color"] {
   flex: 1;
 }
 
-.choose-photo {
-  width: 100%;
+.photo-row {
+  display: flex;
+  gap: 6px;
+}
+.photo-row .photo-btn {
+  flex: 1;
+}
+.photo-row .photo-btn--icon {
+  flex: 0 0 auto;
+  padding: 6px 8px;
 }
 
 /* ---- Bill of Materials (print view) ---- */
@@ -472,7 +557,11 @@ input[type="color"] {
   .bom-page {
     box-shadow: none;
     margin: 0;
-    page-break-after: always;
+  }
+  /* Page break BETWEEN pages only — never after the last page (which would
+     emit a trailing blank). */
+  .bom-page + .bom-page {
+    page-break-before: always;
   }
   @page {
     size: A4;

@@ -16,6 +16,7 @@ const NOOP_ACTIONS = {
   onOpen: () => {},
   onSave: () => {},
   onGenerateBom: () => {},
+  onLoadExample: () => {},
 };
 
 function customFrame(id: string, width: number, height: number): Frame {

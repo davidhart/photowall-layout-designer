@@ -1,4 +1,5 @@
 import { orientSize, outerSize } from "../model/geometry";
+import { standardSizes } from "../model/standards";
 import type { AABB, Frame, Photo, Project } from "../model/types";
 import { setHref, svgEl } from "./svg";
 
@@ -6,6 +7,8 @@ import { setHref, svgEl } from "./svg";
 const MAT_COLOR = "#f0ece3";
 /** Letterbox / empty-frame backing color. */
 const PHOTO_BACKING_COLOR = "#ffffff";
+/** Text color for the empty-frame label (size name + dimensions). */
+const EMPTY_LABEL_COLOR = "#9a9aa1";
 /** Selection highlight color. */
 const SELECT_COLOR = "#2b6cff";
 /** Grid line color. */
@@ -124,6 +127,8 @@ export function renderFrame(
     });
     setHref(image, photo.dataUrl);
     g.appendChild(image);
+  } else {
+    g.appendChild(buildEmptyFrameLabel(frame, photoW, photoH));
   }
 
   // Selection highlight (constant on-screen width regardless of zoom).
@@ -148,6 +153,82 @@ export function renderFrame(
   );
 
   return g;
+}
+
+/**
+ * Trims trailing zeros for a compact cm number (e.g. `21`, `29.7`). Shared
+ * with the empty-frame label below.
+ */
+function fmtCm(n: number): string {
+  return Number.isInteger(n) ? String(n) : String(Number(n.toFixed(1)));
+}
+
+/**
+ * Builds the centered name + dimensions label shown inside an empty frame.
+ * Sizes are in **cm** (the SVG viewBox is cm), so the label scales with the
+ * frame and with zoom. Custom-size frames drop the name line.
+ *
+ * Wraps the text in an inner group that counter-rotates the parent frame's
+ * rotation, so the label always reads upright regardless of frame orientation.
+ */
+function buildEmptyFrameLabel(
+  frame: Frame,
+  photoW: number,
+  photoH: number,
+): SVGGElement {
+  const name = frame.standardSizeId
+    ? standardSizes().find((s) => s.id === frame.standardSizeId)?.name ?? null
+    : null;
+  // Show the frame's nominal aperture size (what people call the "frame
+  // size"), not the post-passpartout inner-window size. Font sizing still
+  // uses the visible white area so the text never spills past the backing.
+  const dims = `${fmtCm(frame.aperture.width)} × ${fmtCm(frame.aperture.height)} cm`;
+  const short = Math.min(photoW, photoH);
+  const nameFont = short * 0.18;
+  const dimsFont = short * 0.08;
+
+  const text = (
+    y: number,
+    fontSize: number,
+    content: string,
+    extra: Record<string, string> = {},
+  ): SVGTextElement => {
+    const el = svgEl("text", {
+      x: 0,
+      y,
+      "text-anchor": "middle",
+      "dominant-baseline": "middle",
+      "font-size": String(fontSize),
+      fill: EMPTY_LABEL_COLOR,
+      ...extra,
+    }) as SVGTextElement;
+    el.textContent = content;
+    return el;
+  };
+
+  // Inner group counter-rotates the parent frame's rotation so the label is
+  // always upright. (The rotation pivot is the local origin = frame center.)
+  const upright = svgEl("g", {
+    class: "frame__empty-label",
+    transform: `rotate(${-frame.rotation})`,
+  }) as SVGGElement;
+
+  if (name) {
+    upright.appendChild(
+      text(-dimsFont * 0.5, nameFont, name, {
+        "font-weight": "600",
+        class: "frame__empty-name",
+      }),
+    );
+    upright.appendChild(
+      text(nameFont * 0.75, dimsFont, dims, { class: "frame__empty-dims" }),
+    );
+  } else {
+    upright.appendChild(
+      text(0, dimsFont * 1.4, dims, { class: "frame__empty-dims" }),
+    );
+  }
+  return upright;
 }
 
 /**
